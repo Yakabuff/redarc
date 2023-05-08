@@ -5,7 +5,6 @@ with open(filename) as file:
     for line in file:
         line = line.rstrip()
         sub_dict = json.loads(line)
-        #print(sub_dict)
         if 'name' in sub_dict:
           identifier = sub_dict['name'].strip()
         else:

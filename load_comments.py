@@ -4,7 +4,7 @@ filename = ""
 with open(filename) as file:
     for line in file:
         line = line.rstrip()
-        com_dict = json.loads(line).strip()
+        com_dict = json.loads(line)
         identifier = com_dict['id'].strip()
         subreddit = com_dict['subreddit'].strip()
         author = com_dict['author'].strip()

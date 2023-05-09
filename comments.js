@@ -82,6 +82,11 @@ router.get('/', function(req, res){
 	console.log(text)
   pool.query(text, values)
   .then(result => {
+		query_results = result.rows;
+		if (req.query.unflatten && req.query.link_id) {
+      res.send(unflatten(result.rows, req.query.link_id));
+			return;
+		}
     res.send(result.rows);
   })
   .catch(e => {
@@ -89,6 +94,45 @@ router.get('/', function(req, res){
 		res.sendStatus(500);
 		return
 	})
-  })
+})
  
+function unflatten(data, root) {
+  // Turn array of comments into hashmap. Add empty array field replies to comment obj
+	// Iterate over keys
+	// If comment's parent is root, push to commentTree list. These are top level comments
+	// find parent comment in hashmap and append this comment into parent's reply. 
+	// Set replies of root to commentTree 
+	console.log("root" + root)
+  let lookup = arrayToLookup(data);
+	let commentTree = [];
+	Object.keys(lookup).forEach(commentID => {
+    let comment = lookup[commentID];
+		let parentID = comment.parent_id;
+		
+		if (parentID == root) {
+      commentTree.push(comment);
+		} else {
+			if (lookup[parentID.split('_')[1]] == undefined) {
+				console.log(commentID)
+				console.log("has no parent")
+				commentTree.push({body: comment.body, author: comment.author, id: commentID, replies: [comment], parent_id: root, link_id: root})
+			} else {
+        lookup[parentID.split('_')[1]].replies.push(comment);
+				console.log("reply found:" + commentID)
+				console.log("parent: "+ parentID)
+				console.log(lookup[parentID.split('_')[1]].replies.length)
+		  }
+		}
+  });
+  console.log(commentTree);
+	return commentTree;
+}
+function arrayToLookup(commentList){
+	let lookup = {}
+  commentList.forEach(comment => {
+    comment.replies = [];
+		lookup[comment.id] = comment;
+  });
+	return lookup;
+}
 module.exports = router;

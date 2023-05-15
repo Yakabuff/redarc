@@ -45,7 +45,7 @@ router.get('/', function(req, res){
       text += ' and';
 		}
 		values.push(req.query.after)
-		text += ` created_utc > TO_TIMESTAMP(\$${count})`
+		text += ` created_utc > \$${count}`
 	}
 	if (req.query.before) {
 		count = count + 1;
@@ -53,7 +53,7 @@ router.get('/', function(req, res){
       text += ' and';
 		}
 		values.push(req.query.before)
-		text += ` and created_utc < TO_TIMESTAMP(\$${count})`
+		text += ` created_utc < \$${count}`
 	} 
 	if (req.query.sort) {
 		count = count + 1;

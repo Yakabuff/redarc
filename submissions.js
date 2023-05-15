@@ -62,11 +62,11 @@ router.get('/', function(req, res){
 	} else {
 		text += ` ORDER BY created_utc DESC`
 	}
-	text += ` LIMIT 5`
+	text += ` LIMIT 100`
 	console.log(text)
   pool.query(text, values)
   .then(result => {
-    res.send(result.rows);
+    res.json(result.rows);
   })
   .catch(e => {
 		console.error(e.stack);

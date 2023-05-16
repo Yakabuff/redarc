@@ -63,7 +63,7 @@ router.get('/', function(req, res){
 		text += ` ORDER BY created_utc DESC`
 	}
 	text += ` LIMIT 100`
-	console.log(text)
+
   pool.query(text, values)
   .then(result => {
     res.json(result.rows);

@@ -79,7 +79,7 @@ router.get('/', function(req, res){
 		text += ` ORDER BY created_utc DESC`
 	}
 	text += ` LIMIT 500`
-	console.log(text)
+
   pool.query(text, values)
   .then(result => {
 		query_results = result.rows;
@@ -102,7 +102,7 @@ function unflatten(data, root) {
 	// If comment's parent is root, push to commentTree list. These are top level comments
 	// find parent comment in hashmap and append this comment into parent's reply. 
 	// Set replies of root to commentTree 
-	console.log("root" + root)
+
   let lookup = arrayToLookup(data);
 	let commentTree = [];
 	Object.keys(lookup).forEach(commentID => {
@@ -113,18 +113,13 @@ function unflatten(data, root) {
       commentTree.push(comment);
 		} else {
 			if (lookup[parentID.split('_')[1]] == undefined) {
-				console.log(commentID)
-				console.log("has no parent")
 				commentTree.push({body: comment.body, author: comment.author, id: commentID, replies: [comment], parent_id: root, link_id: root})
 			} else {
-        lookup[parentID.split('_')[1]].replies.push(comment);
-				console.log("reply found:" + commentID)
-				console.log("parent: "+ parentID)
-				console.log(lookup[parentID.split('_')[1]].replies.length)
+        		lookup[parentID.split('_')[1]].replies.push(comment);
 		  }
 		}
   });
-  console.log(commentTree);
+
 	return commentTree;
 }
 function arrayToLookup(commentList){

@@ -8,8 +8,10 @@ export default function Thread(){
   const params = useParams()
   const subreddit = params.subreddit;
   const threadID = params.threadID;
+  const formal_threadID = threadID.split('_').length > 1 ? threadID : 't3' + '_' + threadID;
+
   useEffect(() => {
-      fetch("http://localhost:3000/search/comments?link_id=t3_"+threadID + "&unflatten=true")
+      fetch("http://localhost:3000/search/comments?link_id="+ formal_threadID + "&unflatten=true")
       .then ((resp) => resp.json())
       .then((data) => {
           setComments(data)

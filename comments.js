@@ -5,7 +5,7 @@ router = express.Router();
 router.get('/', function(req, res){
 	if (Object.keys(req.query).length == 0) {
 		res.sendStatus(500);
-    return;
+    	return;
 	}
 	let text = 'SELECT * FROM comments where'
 	let values = [];

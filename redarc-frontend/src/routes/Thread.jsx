@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams} from 'react-router';
 import Post from "./Post";
 import Comment from "./Comment";
+
 export default function Thread(){
   const [comments, setComments] = useState([]);
   const [post, setPost] = useState({});
@@ -11,14 +12,14 @@ export default function Thread(){
   const formal_threadID = threadID.split('_').length > 1 ? threadID : 't3' + '_' + threadID;
 
   useEffect(() => {
-      fetch("http://localhost:3000/search/comments?link_id="+ formal_threadID + "&unflatten=true")
+      fetch(import.meta.env.VITE_API_DOMAIN + "/search/comments?link_id="+ formal_threadID + "&unflatten=true")
       .then ((resp) => resp.json())
       .then((data) => {
           setComments(data)
       })
       .catch((error) => setComments([]));
 
-      fetch("http://localhost:3000/search/submissions?id="+threadID)
+      fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?id="+threadID)
       .then ((resp) => resp.json())
       .then((data) => {
           setPost(data[0])
@@ -42,10 +43,6 @@ export default function Thread(){
 
       {comments.map((comment) => {
          return(
-            // <>
-            // <h2>{comment.author}</h2>
-            // <h2>{comment.body}</h2>
-            // </>
             <Comment 
                id = {comment.id}
                body = {comment.body}

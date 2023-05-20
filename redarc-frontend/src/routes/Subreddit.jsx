@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams} from 'react-router';
+
 export default function Subreddit(){
   const [threads, setThreads] = useState([]);
   const params = useParams()
   const subreddit = params.subreddit;
   const [pos, setPos] = useState(1);
   useEffect(() => {
-      fetch("http://localhost:3000/search/submissions?subreddit="+subreddit)
+      fetch(import.meta.env.VITE_API_DOMAIN+ "/search/submissions?subreddit="+subreddit)
       .then ((resp) => resp.json())
       .then((data) => {
           setThreads(data)
@@ -19,7 +20,7 @@ export default function Subreddit(){
     let  date = table.rows[ table.rows.length - 1 ].cells[3].innerHTML;
 
     console.log(date)
-    fetch("http://localhost:3000/search/submissions?subreddit="+subreddit+"&before="+date)
+    fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&before="+date)
     .then ((resp) => resp.json())
     .then((data) => {
         setThreads(data)
@@ -33,7 +34,7 @@ export default function Subreddit(){
     let date = table.rows[ table.rows.length - 1 ].cells[3].innerHTML;
 
 
-    fetch("http://localhost:3000/search/submissions?subreddit="+subreddit+"&after="+date)
+    fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&after="+date)
     .then ((resp) => resp.json())
     .then((data) => {
         setThreads(data)
@@ -48,7 +49,7 @@ export default function Subreddit(){
   const jump = () => {
     var e = document.getElementById("year");
     var value = e.value;
-    fetch("http://localhost:3000/search/submissions?subreddit="+subreddit+"&before="+value)
+    fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&before="+value)
     .then ((resp) => resp.json())
     .then((data) => {
         setThreads(data)

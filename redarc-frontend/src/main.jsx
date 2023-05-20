@@ -4,7 +4,7 @@ import Root from "./routes/root";
 import Subreddit from "./routes/Subreddit";
 import Thread from "./routes/Thread";
 import Error from "./routes/Error";
-//import App from './App.jsx'
+
 import {
   createBrowserRouter,
   RouterProvider,

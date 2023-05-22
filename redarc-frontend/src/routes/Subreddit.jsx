@@ -49,7 +49,7 @@ export default function Subreddit(){
   const jump = () => {
     var e = document.getElementById("year");
     var value = e.value;
-    fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&before="+value)
+    fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&after="+value+"&sort=ASC")
     .then ((resp) => resp.json())
     .then((data) => {
         setThreads(data)
@@ -71,6 +71,16 @@ export default function Subreddit(){
       <option value="2017-01-01T00:00:00.000Z">2017</option>
       <option value="2016-01-01T00:00:00.000Z">2016</option>
       <option value="2015-01-01T00:00:00.000Z">2015</option>
+      <option value="2014-01-01T00:00:00.000Z">2014</option>
+      <option value="2013-01-01T00:00:00.000Z">2013</option>
+      <option value="2012-01-01T00:00:00.000Z">2012</option>
+      <option value="2011-01-01T00:00:00.000Z">2011</option>
+      <option value="2010-01-01T00:00:00.000Z">2010</option>
+      <option value="2009-01-01T00:00:00.000Z">2009</option>
+      <option value="2008-01-01T00:00:00.000Z">2008</option>
+      <option value="2007-01-01T00:00:00.000Z">2007</option>
+      <option value="2006-01-01T00:00:00.000Z">2006</option>
+      <option value="2005-01-01T00:00:00.000Z">2005</option>
     </select>
     <button onClick={prev}>Prev</button>
     <code> {pos} </code>

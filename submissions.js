@@ -55,23 +55,20 @@ router.get('/', function(req, res){
 		values.push(req.query.before)
 		text += ` created_utc < \$${count}`
 	} 
-	if (req.query.sort) {
-		count = count + 1;
-		values.push(req.query.sort)
-		text += ` ORDER BY created_utc \$${count})`
+	if (req.query.sort === 'ASC') {
+		text += ` ORDER BY created_utc ASC`
 	} else {
 		text += ` ORDER BY created_utc DESC`
 	}
 	text += ` LIMIT 100`
-
-  pool.query(text, values)
-  .then(result => {
-    res.json(result.rows);
-  })
-  .catch(e => {
-		console.error(e.stack);
-		res.sendStatus(500);
-		return
+	pool.query(text, values)
+	.then(result => {
+		res.json(result.rows);
+	})
+	.catch(e => {
+			console.error(e.stack);
+			res.sendStatus(500);
+			return
 	})
 });
 

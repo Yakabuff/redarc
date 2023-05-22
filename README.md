@@ -26,8 +26,9 @@ docker run \
 ```
 
 ```
-psql -h localhost -U postgres -a -f db.sql
-psql -h localhost -U postgres -a -f db2.sql
+psql -h localhost -U postgres -a -f db_submissions.sql
+psql -h localhost -U postgres -a -f db_comments.sql
+psql -h localhost -U postgres -a -f db_subreddits.sql
 ```
 
 ### 3) Process dump and insert rows into postgres database with the load_sub/load_comments scripts
@@ -35,6 +36,7 @@ psql -h localhost -U postgres -a -f db2.sql
 ```
 python3 load_sub.py submission_file.txt
 python3 load_comments.py comment_file.txt
+python3 index.py
 ```
 
 ### 4) Start the API server.
@@ -48,6 +50,9 @@ pm2 start server.js
 
 ### 5) Start the frontend
 
+```
+mv sample.env .env
+```
 Set address for API server in the .env file
 
 ```
@@ -115,3 +120,5 @@ systemctl restart nginx
 - `[before = <utc_timestamp>]`
 - `[after = <utc_timestamp>]`
 - `[sort = <ASC/DESC>]`
+
+`search/subreddits`

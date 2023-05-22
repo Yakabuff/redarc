@@ -37,6 +37,7 @@ psql -h localhost -U postgres -a -f db_subreddits.sql
 python3 load_sub.py submission_file.txt
 python3 load_comments.py comment_file.txt
 python3 index.py
+python3 unlist.py <subreddit> <true/false>
 ```
 
 ### 4) Start the API server.

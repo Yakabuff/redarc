@@ -93,7 +93,7 @@ export default function Subreddit(){
               <tr>
                 <td style={{border: "1px solid"}}> <a href = {`/r/${subreddit}/comments/${thread.id}`}>{thread.title}</a></td>
                 <td style={{border: "1px solid"}}> {thread.subreddit}</td>
-                <td style={{border: "1px solid"}}> {thread.author}</td>
+                <td style={{border: "1px solid"}}> Anon</td>
                 <td style={{border: "1px solid"}}> {thread.created_utc}</td>
                 <td style={{border: "1px solid"}}> ⬆{thread.score}</td>
                 <td style={{border: "1px solid"}}> 🥇{thread.gilded}</td>

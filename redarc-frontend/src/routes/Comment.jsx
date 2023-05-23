@@ -10,7 +10,7 @@ export default function Comment(props){
    return(
       <>
       <div>
-         <h4> {author} | ⬆ {score} | 📅 {date} | {replies.length} replies</h4>
+         <h4> Anonymous | ⬆ {score} | 📅 {date} | {replies.length} replies</h4>
          {<code>{body}</code>}
       </div>
 

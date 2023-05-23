@@ -12,7 +12,7 @@ export default function Post(props){
    return(
       <div>
          <h1>{title}</h1>
-         <h4>{type} | {author} | ⬆ {score} | 📅 {date} | {num_comments} comments</h4>
+         <h4>{type} | Anonymous | ⬆ {score} | 📅 {date} | {num_comments} comments</h4>
          {is_self ? <code>{self_text}</code> : <code>{url}</code>}
          <hr></hr>
       </div>

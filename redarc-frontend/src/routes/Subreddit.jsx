@@ -19,7 +19,6 @@ export default function Subreddit(){
     let table = document.getElementById('threads')
     let  date = table.rows[ table.rows.length - 1 ].cells[3].innerHTML;
 
-    console.log(date)
     fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&before="+date)
     .then ((resp) => resp.json())
     .then((data) => {

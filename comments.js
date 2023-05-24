@@ -71,10 +71,8 @@ router.get('/', function(req, res){
 		values.push(req.query.link_id)
 		text += ` link_id = \$${count}`
 	} 
-	if (req.query.sort) {
-		count = count + 1;
-		values.push(req.query.sort)
-		text += ` ORDER BY created_utc \$${count})`
+	if (req.query.sort === 'ASC') {
+		text += ` ORDER BY created_utc ASC`
 	} else {
 		text += ` ORDER BY created_utc DESC`
 	}

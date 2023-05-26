@@ -10,17 +10,13 @@ export default function Comment(props){
    return(
       <>
       <div>
-         <h4> Anonymous | ⬆ {score} | 📅 {date} | {replies.length} replies</h4>
-         {<code>{body}</code>}
+         <h4> <span class="label label-success">Anonymous</span> <span class="label label-important">⬆ {score}</span>  <span class="label label-info">{date}</span>  <span class="label label-default">{replies.length} replies</span></h4>
+         <div class="well">{<p>{body}</p>}</div>
       </div>
 
       {replies.map((comment) => {
          return(
-            // <>
-            // <h2>{comment.author}</h2>
-            // <h2>{comment.body}</h2>
-            // </>
-            <div style = {{marginLeft: 50, borderLeftStyle: "solid", borderWidth: 1, paddingLeft: 15}}>
+            <div style = {{marginLeft: 50, borderLeftStyle: "dotted", borderWidth: 0.5, paddingLeft: 15}}>
                <Comment 
                   id = {comment.id}
                   body = {comment.body}

@@ -4,6 +4,7 @@ import Root from "./routes/root";
 import Subreddit from "./routes/Subreddit";
 import Thread from "./routes/Thread";
 import Error from "./routes/Error";
+import '../public/bootstrap/css/bootstrap.min.css'
 
 import {
   createBrowserRouter,

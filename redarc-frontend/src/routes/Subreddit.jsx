@@ -5,7 +5,7 @@ export default function Subreddit(){
   const [threads, setThreads] = useState([]);
   const params = useParams()
   const subreddit = params.subreddit;
-  const [pos, setPos] = useState(1);
+
   useEffect(() => {
       fetch(import.meta.env.VITE_API_DOMAIN+ "/search/submissions?subreddit="+subreddit)
       .then ((resp) => resp.json())
@@ -17,7 +17,7 @@ export default function Subreddit(){
 
   const next = ()=>{
     let table = document.getElementById('threads')
-    let  date = table.rows[ table.rows.length - 1 ].cells[3].innerHTML;
+    let  date = table.rows[ table.rows.length - 1 ].cells[1].innerHTML;
 
     fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&before="+date)
     .then ((resp) => resp.json())
@@ -25,12 +25,10 @@ export default function Subreddit(){
         setThreads(data)
     })
     .catch((error) => setThreads([]));
-    
-    setPos(pos => pos + 1)
   }
   const prev = ()=>{
     let table = document.getElementById('threads');
-    let date = table.rows[ table.rows.length - 1 ].cells[3].innerHTML;
+    let date = table.rows[ table.rows.length - 1 ].cells[1].innerHTML;
 
 
     fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&after="+date)
@@ -39,10 +37,6 @@ export default function Subreddit(){
         setThreads(data)
     })
     .catch((error) => setThreads([]));
-    
-    if (pos > 1){
-      setPos(pos => pos - 1)
-    }
   }
 
   const jump = () => {
@@ -57,10 +51,15 @@ export default function Subreddit(){
   }
 
   return (
-    <>
+    <body>
+    <ul class="breadcrumb">
+      <li><a href="/">Index</a> <span class="divider">/</span></li>
+    </ul>
+    <div class="container">
+
     <h1>/r/{subreddit}</h1>
-    <button onClick={jump}>Jump</button>
-    <select name="year" id="year">
+
+    <select name="year" id="year" onChange={jump}>
       <option value="2023-01-01T00:00:00.000Z">2023</option>
       <option value="2022-01-01T00:00:00.000Z">2022</option>
       <option value="2021-01-01T00:00:00.000Z">2021</option>
@@ -81,31 +80,31 @@ export default function Subreddit(){
       <option value="2006-01-01T00:00:00.000Z">2006</option>
       <option value="2005-01-01T00:00:00.000Z">2005</option>
     </select>
-    <button onClick={prev}>Prev</button>
-    <code> {pos} </code>
-    <button onClick={next}>Next</button>
     <br/>
-    <table style={{border: "1px solid"}} id = "threads">
+    <button onClick={prev} class = "btn btn-link">Prev</button>
+    <button onClick={next} class = "btn btn-link">Next</button>
+    <br/>
+    <br/>
+    <table id = "threads" class = "table table-bordered table-condensed">
 
           {threads.map((thread) => {
             return (
               <tr>
-                <td style={{border: "1px solid"}}> <a href = {`/r/${subreddit}/comments/${thread.id}`}>{thread.title}</a></td>
-                <td style={{border: "1px solid"}}> {thread.subreddit}</td>
-                <td style={{border: "1px solid"}}> Anon</td>
-                <td style={{border: "1px solid"}}> {thread.created_utc}</td>
-                <td style={{border: "1px solid"}}> ⬆{thread.score}</td>
-                <td style={{border: "1px solid"}}> 🥇{thread.gilded}</td>
-                <td style={{border: "1px solid"}}> 💬{thread.num_comments}</td>
+                <td> <a href = {`/r/${subreddit}/comments/${thread.id}`}>{thread.title}</a></td>
+                <td> {thread.created_utc} </td>
+                <td> ⬆ {thread.score}</td>
+                <td>🥇 {thread.gilded} </td>
+                <td> 💬 {thread.num_comments}</td>
               </tr>
             );
           })}
 
     </table>
-    <button onClick={prev}>Prev</button>
-    <code> {pos} </code>
-    <button onClick={next}>Next</button>
+    <button onClick={prev} class = "btn btn-link">Prev</button>
+    <button onClick={next} class = "btn btn-link">Next</button>
     <br/>
-   </>
+    </div>
+    <br/>
+    </body>
   );  
 }

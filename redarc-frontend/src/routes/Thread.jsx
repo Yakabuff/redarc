@@ -23,38 +23,44 @@ export default function Thread(){
       .then ((resp) => resp.json())
       .then((data) => {
           setPost(data[0])
+          document.title = 'Redarc - ' + data[0].title;
       })
       .catch((error) => setPost({}));
   }, []);
 
   return (
-      <>
-      <Post 
-         title = {post.title}
-         author = {post.author}
-         is_self = {post.is_self}
-         date = {post.created_utc}
-         body = {post.self_text}
-         url = {post.url}
-         gilded = {post.gilded}
-         score = {post.score}
-         num_comments = {post.num_comments}
-      />
+    <body>
+        <ul class="breadcrumb">
+            <li><a href="/">Index</a> <span class="divider">/</span></li>
+            <li><a href={`/r/${subreddit}`}>{subreddit}</a> <span class="divider">/</span></li>
+        </ul>
+        <div class="container">
+        <Post 
+            title = {post.title}
+            author = {post.author}
+            is_self = {post.is_self}
+            date = {post.created_utc}
+            body = {post.self_text}
+            url = {post.url}
+            gilded = {post.gilded}
+            score = {post.score}
+            num_comments = {post.num_comments}
+        />
 
-      {comments.map((comment) => {
-         return(
+        {comments.map((comment) => {
+            return(
             <Comment 
-               id = {comment.id}
-               body = {comment.body}
-               author = {comment.author}
-               score = {comment.score}
-               gilded = {comment.gilded}
-               date = {comment.created_utc}
-               replies = {comment.replies}
-               depth = {0} />
-         )
-      })}
-
-   </>
+                id = {comment.id}
+                body = {comment.body}
+                author = {comment.author}
+                score = {comment.score}
+                gilded = {comment.gilded}
+                date = {comment.created_utc}
+                replies = {comment.replies}
+                depth = {0} />
+            )
+        })}
+        </div>
+    </body>
   );  
 }

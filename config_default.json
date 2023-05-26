@@ -1,7 +1,7 @@
 {
-	"host": "",
-	"port": 0000,
-	"database": "",
-	"user": "",
-	"password": ""
+	"host": "pgsql-dev",
+	"port": 5432,
+	"database": "postgres",
+	"user": "postgres",
+	"password": "test1234"
 }

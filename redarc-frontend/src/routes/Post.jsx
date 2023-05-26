@@ -12,8 +12,8 @@ export default function Post(props){
    return(
       <div>
          <h1>{title}</h1>
-         <h4>{type} | Anonymous | ⬆ {score} | 📅 {date} | {num_comments} comments</h4>
-         {is_self ? <code>{self_text}</code> : <code>{url}</code>}
+         <h4><span class="label label-info">{type}</span>  <span class="label label-success">Anonymous</span>  <span class="label label-important">⬆ {score}</span>  <span class="label label-info">{date}</span>  <span class="label label-default">{num_comments} comments</span></h4>
+         {is_self ? <div class="well"><p style={{overflowWrap: 'break-word'}}>{self_text}</p></div> : <div class="well"><p style={{overflowWrap: 'break-word'}}><small>{url}</small></p></div>}
          <hr></hr>
       </div>
    )

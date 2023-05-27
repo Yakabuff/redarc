@@ -1,6 +1,6 @@
 # redarc
 pushshift.io is dead.  Here's how you can host your own Reddit archive.
-### 1) Download pushshift dumps
+### Download pushshift dumps
 
 ```
 https://the-eye.eu/redarcs/
@@ -14,15 +14,39 @@ Top 20,000 subreddits:
 magnet:?xt=urn:btih:c398a571976c78d346c325bd75c47b82edf6124e&tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce
 ```
 
+# Docker (Recommended)
+Run these in order. 
+If you wish to change the postgres password, make sure POSTGRES_PASSWORD and PGPASSWORD are the same.
+```
+$ docker network create redarc
+
+$ docker pull postgres
+
+$ docker run \
+  --name pgsql-dev \
+  --network redarc \
+  -e POSTGRES_PASSWORD=test1234 \
+  -d \
+  -v ${PWD}/postgres-docker:/var/lib/postgresql/data \
+  -p 5432:5432 postgres 
+
+$ docker build . -t redarc
+
+$ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -d -p 80:80 -it redarc 
+```
+
+# Manual installation:
+
 ### 2) Provision Postgres database 
 
 ```
-docker pull postgres
-docker run \
+$ docker pull postgres
+$ docker run \
   --name pgsql-dev \
-  –rm \
   -e POSTGRES_PASSWORD=test1234 \
-  -p 5432:5432 postgres
+  -d \
+  -v ${PWD}/postgres-docker:/var/lib/postgresql/data \
+  -p 5432:5432 postgres 
 ```
 
 ```
@@ -97,7 +121,6 @@ npm run build
 cp -R dist/* /var/www/html/redarc/
 systemctl restart nginx
 ```
-
 
 # API:
 

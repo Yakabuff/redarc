@@ -1,0 +1,6 @@
+node_modules
+postgres-docker
+*/.env
+*/redarc.conf
+*/dist
+config.json

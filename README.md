@@ -15,8 +15,17 @@ magnet:?xt=urn:btih:c398a571976c78d346c325bd75c47b82edf6124e&tr=https%3A%2F%2Fac
 ```
 
 # Docker (Recommended)
-Run these in order. 
-If you wish to change the postgres password, make sure POSTGRES_PASSWORD and PGPASSWORD are the same.
+Commands must be run in order.
+
+If you wish to change the postgres password, make sure `POSTGRES_PASSWORD` and `PGPASSWORD` are the same.
+
+If you are using redarc on your personal machine, set docker envars `REDARC_API=http://localhost/api` and `SERVER_NAME=localhost`.
+
+`REDARC_API` is the URL of your API server; it must end with `/api` 
+eg: `http://redarc.basedbin.org/api`.  
+
+`SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.basedbin.org`
+
 ```
 $ docker network create redarc
 

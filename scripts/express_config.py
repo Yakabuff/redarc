@@ -1,7 +1,6 @@
 import os
 
-POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
-
+POSTGRES_PASSWORD = os.environ["PGPASSWORD"]
 
 with open("config.json") as f:
     newText=f.read().replace('test1234', POSTGRES_PASSWORD)

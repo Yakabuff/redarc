@@ -44,9 +44,17 @@ $ docker build . -t redarc
 $ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -d -p 80:80 -it redarc 
 ```
 
+```
+python3 load_sub.py submission_file.txt
+python3 load_comments.py comment_file.txt
+python3 index.py
+python3 unlist.py <subreddit> <true/false>
+```
+
+
 # Manual installation:
 
-### 2) Provision Postgres database 
+### 1) Provision Postgres database 
 
 ```
 $ docker pull postgres
@@ -64,7 +72,7 @@ psql -h localhost -U postgres -a -f db_comments.sql
 psql -h localhost -U postgres -a -f db_subreddits.sql
 ```
 
-### 3) Process dump and insert rows into postgres database with the load_sub/load_comments scripts
+### 2) Process dump and insert rows into postgres database with the load_sub/load_comments scripts
 
 ```
 python3 load_sub.py submission_file.txt
@@ -73,7 +81,7 @@ python3 index.py
 python3 unlist.py <subreddit> <true/false>
 ```
 
-### 4) Start the API server.
+### 3) Start the API server.
 
 ```
 npm i
@@ -82,7 +90,7 @@ OR
 pm2 start server.js
 ```
 
-### 5) Start the frontend
+### 4) Start the frontend
 
 ```
 mv sample.env .env
@@ -99,7 +107,7 @@ npm i
 npm run dev // Dev server
 ```
 
-### 6) Provision NGINX (Optional)
+### 5) Provision NGINX (Optional)
 
 /etc/nginx/conf.d/redarc.conf
 

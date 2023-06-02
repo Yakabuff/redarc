@@ -1,5 +1,5 @@
 # redarc
-pushshift.io is dead.  Here's how you can host your own Reddit archive.
+Here's how you can host your own Reddit archive.
 ### Download pushshift dumps
 
 ```
@@ -15,7 +15,10 @@ magnet:?xt=urn:btih:c398a571976c78d346c325bd75c47b82edf6124e&tr=https%3A%2F%2Fac
 ```
 
 # Docker (Recommended)
-Commands must be run in order.
+
+Install Docker: https://docs.docker.com/engine/install
+
+The following commands must be run in order.
 
 If you wish to change the postgres password, make sure `POSTGRES_PASSWORD` and `PGPASSWORD` are the same.
 
@@ -44,6 +47,7 @@ $ docker build . -t redarc
 $ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -d -p 80:80 -it redarc 
 ```
 
+Ensure Python3 and PIP are installed:
 ```
 python3 load_sub.py submission_file.txt
 python3 load_comments.py comment_file.txt

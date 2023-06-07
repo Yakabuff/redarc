@@ -49,10 +49,11 @@ $ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SER
 
 Ensure Python3 and PIP are installed:
 ```
-python3 load_sub.py submission_file.txt
-python3 load_comments.py comment_file.txt
-python3 index.py
-python3 unlist.py <subreddit> <true/false>
+python3 scripts/load_sub.py submission_file.txt
+python3 scripts/load_comments.py comment_file.txt
+python3 scripts/index.py
+# Optional
+python3 scripts/unlist.py <subreddit> <true/false>
 ```
 
 

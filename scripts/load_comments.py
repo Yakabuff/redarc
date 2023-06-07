@@ -32,15 +32,14 @@ with open(filename) as file:
         continue
 
       if 'subreddit' in com_dict and isinstance(com_dict['subreddit'], str):
-        subreddit = com_dict['subreddit'].strip()
+        subreddit = com_dict['subreddit'].strip().lower()
       else:
         logging.error("Could not find subreddit for: " + identifier)
         logging.debug("Line number: "+ str(line_number))
-        print("================================")
         continue
 
       if 'author' in com_dict and isinstance(com_dict['author'], str):
-        author = com_dict['author'].strip()
+        author = com_dict['author'].strip().lower()
       else:
         logging.warning("Could not find author in " + identifier)
         logging.debug("Line number: "+ str(line_number))
@@ -82,20 +81,25 @@ with open(filename) as file:
         body = ""
 
       if 'link_id' in com_dict and isinstance(com_dict['link_id'], str):
-        link_id = com_dict['link_id'].strip()
+        if len(com_dict['link_id'].split('_')) > 1:
+          link_id = com_dict['link_id'].strip().split('_')[1]
+        else:
+          link_id = com_dict['link_id'].strip()
       else:
-        logging.warning("Could not find link_id in " + identifier)
+        logging.error("Could not find link_id in " + identifier)
         logging.debug("Line number: "+ str(line_number))
-        link_id = ""
+        continue
 
       if 'parent_id' in com_dict and isinstance(com_dict['parent_id'], str):
-        parent_id = com_dict['parent_id'].strip()
+        if len(com_dict['parent_id'].split('_')) > 1:
+          parent_id = com_dict['parent_id'].strip().split('_')[1]
+        else:
+          parent_id = com_dict['parent_id'].strip()
       else:
         logging.warning("Could not find parent_id in " + identifier)
         logging.debug("Line number: "+ str(line_number))
         parent_id = link_id
 
-      print('====================')
       try:
         cursor.execute('INSERT INTO comments(id, subreddit, body, author, score, gilded, created_utc, parent_id, link_id) VALUES (%s, %s, %s, %s, %s, %s, to_timestamp(%s), %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, subreddit, body, author, score, gilded, created_utc, parent_id, link_id])
       except Exception as error:
@@ -110,6 +114,5 @@ with open(filename) as file:
         logging.debug(parent_id)
         logging.debug(link_id)
         continue
-      print(f"Identifier inserted succesfully {identifier}")
 conn.commit()
 conn.close()

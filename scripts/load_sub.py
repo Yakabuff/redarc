@@ -27,13 +27,12 @@ with open(filename) as file:
       # id is occasionally missing.  Use the 'name' field to derive id
       if 'id' in sub_dict and isinstance(sub_dict['id'], str):
         identifier = sub_dict['id'].strip().replace("\u0000", "").lower()
-      elif 'name' in sub_dict and isinstance(sub_dict['name'], str) and len(identifier.split('_')) > 1:
+      elif 'name' in sub_dict and isinstance(sub_dict['name'], str) and len(sub_dict['name'].split('_')) > 1:
         identifier = sub_dict['name'].strip().replace("\u0000", "").lower()
         identifier = identifier.split('_')[1]
       else:
         logging.error("Could not find ID")
         logging.debug("Line number: "+ str(line_number))
-        print("================================")
         continue
 
       if 'subreddit' in sub_dict and isinstance(sub_dict['subreddit'], str):
@@ -41,7 +40,6 @@ with open(filename) as file:
       else:
         logging.error("Could not find subreddit for: " + identifier)
         logging.debug("Line number: "+ str(line_number))
-        print("================================")
         continue
 
       if 'title' in sub_dict and isinstance(sub_dict['title'], str):
@@ -133,7 +131,6 @@ with open(filename) as file:
         else:
           thumbnail = "default"
 
-      print('====================')
       try:
         cursor.execute('INSERT INTO submissions(id, subreddit, title, author, permalink, thumbnail, num_comments, url, score, gilded, created_utc, self_text, is_self) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, to_timestamp(%s), %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, subreddit, title, author, permalink, thumbnail, num_comments, url, score, gilded, created_utc, self_text, is_self])
       except Exception as error:
@@ -154,6 +151,5 @@ with open(filename) as file:
         logging.debug(is_self)
         logging.debug("================================")
         continue
-      print(f"Identifier inserted succesfully {identifier}")
 conn.commit()
 conn.close()

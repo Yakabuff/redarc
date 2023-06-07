@@ -20,7 +20,7 @@ router.get('/', function(req, res){
 		if (values.length != 0) {
       text += ' and';
 		}
-		values.push(req.query.author)
+		values.push(req.query.author.toLowerCase())
 		text += ` author = \$${count}`
 	}
 	if (req.query.body) {
@@ -36,7 +36,7 @@ router.get('/', function(req, res){
 		if (values.length != 0) {
       text += ' and';
 		}
-		values.push(req.query.subreddit)
+		values.push(req.query.subreddit.toLowerCase())
 		text += ` subreddit = \$${count}`
 	}
 	if (req.query.after) {
@@ -101,22 +101,22 @@ function unflatten(data, root) {
 	// find parent comment in hashmap and append this comment into parent's reply. 
 	// Set replies of root to commentTree 
 
-  let lookup = arrayToLookup(data);
+   let lookup = arrayToLookup(data);
 	let commentTree = [];
 	Object.keys(lookup).forEach(commentID => {
-    let comment = lookup[commentID];
-		let parentID = comment.parent_id;
+   let comment = lookup[commentID];
+	let parentID = comment.parent_id;
 		
-		if (parentID == root) {
-      commentTree.push(comment);
+	if (parentID == root) {
+	commentTree.push(comment);
+	} else {
+		if (lookup[parentID] == undefined) {
+			commentTree.push({body: comment.body, author: comment.author, id: commentID, replies: [comment], parent_id: root, link_id: root})
 		} else {
-			if (lookup[parentID.split('_')[1]] == undefined) {
-				commentTree.push({body: comment.body, author: comment.author, id: commentID, replies: [comment], parent_id: root, link_id: root})
-			} else {
-        		lookup[parentID.split('_')[1]].replies.push(comment);
-		  }
+			lookup[parentID].replies.push(comment);
 		}
-  });
+	}
+});
 
 	return commentTree;
 }

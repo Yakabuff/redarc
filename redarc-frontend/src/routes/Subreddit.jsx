@@ -91,6 +91,7 @@ export default function Subreddit(){
           {threads.map((thread) => {
             return (
               <tr>
+                <td> <span class="label label-info">{thread.is_self ? "self" : "link"}</span></td>
                 <td> <a href = {`/r/${subreddit}/comments/${thread.id}`}>{thread.title}</a></td>
                 <td> {thread.created_utc} </td>
                 <td> ⬆ {thread.score}</td>
@@ -105,17 +106,6 @@ export default function Subreddit(){
     <button onClick={next} class = "btn btn-link">Next</button>
     </div>
     <br/>
-    <footer style = {{ textAlign: 'center', padding: 30+'px 0', marginTop: 'auto', borderTop: 1+'px solid #e5e5e5', backgroundColor: '#f5f5f5' }}>
-        <div class="container">
-          <small>redarc is licensed under the <a href="http://opensource.org/licenses/MIT">MIT License</a></small>
-          <br/>
-          <ul style = {{display: 'inline', listStyleType: 'none'}}>
-            <li style = {{display: 'inline', paddingRight: 10+'px'}}><small><a href="https://github.com/yakabuff/redarc">redarc</a></small></li>
-            <li style = {{display: 'inline', paddingRight: 10+'px'}}><small><a href="http://basedbin.org">basedbin.org</a></small></li>
-            <li style = {{display: 'inline', paddingRight: 10+'px'}}><small><a href="/about">FAQ</a></small></li>
-          </ul>
-        </div>
-    </footer>
     </body>
     </>
   );  

@@ -20,7 +20,7 @@ router.get('/', function(req, res){
 		if (values.length != 0) {
       text += ' and';
 		}
-		values.push(req.query.author)
+		values.push(req.query.author.toLowerCase())
 		text += ` author = \$${count}`
 	}
 	if (req.query.title) {
@@ -36,7 +36,7 @@ router.get('/', function(req, res){
 		if (values.length != 0) {
       text += ' and';
 		}
-		values.push(req.query.subreddit)
+		values.push(req.query.subreddit.toLowerCase())
 		text += ` subreddit = \$${count}`
 	}
 	if (req.query.after) {

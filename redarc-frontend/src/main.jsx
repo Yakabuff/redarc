@@ -5,6 +5,7 @@ import Subreddit from "./routes/Subreddit";
 import Thread from "./routes/Thread";
 import About from "./routes/About";
 import Error from "./routes/Error";
+import Footer from "./routes/Footer";
 import '../public/bootstrap/css/bootstrap.min.css'
 
 import {
@@ -44,5 +45,6 @@ function ErrorBoundary() {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <RouterProvider router={router} />
-  </React.StrictMode>,
+    <Footer />
+  </React.StrictMode>
 )

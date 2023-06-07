@@ -1,3 +1,4 @@
 node_modules
 config.json
 postgres-docker
+*.log

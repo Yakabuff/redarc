@@ -4,3 +4,4 @@ postgres-docker
 */redarc.conf
 */dist
 config.json
+*.log

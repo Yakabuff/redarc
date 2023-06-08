@@ -17,7 +17,7 @@ export default function Subreddit(){
 
   const next = ()=>{
     let table = document.getElementById('threads')
-    let  date = table.rows[ table.rows.length - 1 ].cells[1].innerHTML;
+    let  date = table.rows[ table.rows.length - 1 ].cells[2].innerHTML;
 
     fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&before="+date)
     .then ((resp) => resp.json())
@@ -28,7 +28,7 @@ export default function Subreddit(){
   }
   const prev = ()=>{
     let table = document.getElementById('threads');
-    let date = table.rows[ table.rows.length - 1 ].cells[1].innerHTML;
+    let date = table.rows[ table.rows.length - 1 ].cells[2].innerHTML;
 
 
     fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&after="+date)

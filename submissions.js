@@ -2,6 +2,12 @@ var express = require('express');
 var pool = require('./pool');
 router = express.Router();
 
+var types = require('pg').types;
+var timestampOID = 1114;
+types.setTypeParser(1114, function(stringValue) {
+  return stringValue;
+})
+
 router.get('/', function(req, res){
 	if (Object.keys(req.query).length == 0) {
 		res.sendStatus(500);

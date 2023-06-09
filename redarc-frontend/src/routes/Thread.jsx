@@ -34,33 +34,33 @@ export default function Thread(){
             <li><a href="/">Index</a> <span class="divider">/</span></li>
             <li><a href={`/r/${subreddit}`}>{subreddit}</a> <span class="divider">/</span></li>
         </ul>
-        <div class="container">
-        <Post 
-            title = {post.title}
-            author = {post.author}
-            is_self = {post.is_self}
-            date = {post.created_utc}
-            body = {post.self_text}
-            url = {post.url}
-            gilded = {post.gilded}
-            score = {post.score}
-            num_comments = {post.num_comments}
-            thumbnail = {post.thumbnail}
-        />
+        <div class="container-fluid">
+                    <Post 
+                        title = {post.title}
+                        author = {post.author}
+                        is_self = {post.is_self}
+                        date = {post.created_utc}
+                        body = {post.self_text}
+                        url = {post.url}
+                        gilded = {post.gilded}
+                        score = {post.score}
+                        num_comments = {post.num_comments}
+                        thumbnail = {post.thumbnail}
+                    />
 
-        {comments.map((comment) => {
-            return(
-            <Comment 
-                id = {comment.id}
-                body = {comment.body}
-                author = {comment.author}
-                score = {comment.score}
-                gilded = {comment.gilded}
-                date = {comment.created_utc}
-                replies = {comment.replies}
-                depth = {0} />
-            )
-        })}
+                    {comments.map((comment) => {
+                        return(
+                        <Comment 
+                            id = {comment.id}
+                            body = {comment.body}
+                            author = {comment.author}
+                            score = {comment.score}
+                            gilded = {comment.gilded}
+                            date = {comment.created_utc}
+                            replies = {comment.replies}
+                            depth = {0} />
+                        )
+                    })}
         </div>
     </body>
     </>

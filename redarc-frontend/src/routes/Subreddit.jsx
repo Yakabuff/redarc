@@ -28,12 +28,13 @@ export default function Subreddit(){
   }
   const prev = ()=>{
     let table = document.getElementById('threads');
-    let date = table.rows[ table.rows.length - 1 ].cells[2].innerHTML;
+    let date = table.rows[ 0 ].cells[2].innerHTML;
 
 
-    fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&after="+date)
+    fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&after="+date+"&sort=ASC")
     .then ((resp) => resp.json())
     .then((data) => {
+        data.reverse()
         setThreads(data)
     })
     .catch((error) => setThreads([]));

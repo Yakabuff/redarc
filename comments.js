@@ -111,7 +111,7 @@ function unflatten(data, root) {
 	commentTree.push(comment);
 	} else {
 		if (lookup[parentID] == undefined) {
-			commentTree.push({body: comment.body, author: comment.author, id: commentID, replies: [comment], parent_id: root, link_id: root})
+			commentTree.push({body: "[comment not found]", author: "[unknown]", id: commentID, replies: [comment], parent_id: root, link_id: root})
 		} else {
 			lookup[parentID].replies.push(comment);
 		}

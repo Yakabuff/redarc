@@ -6,6 +6,8 @@ import Thread from "./routes/Thread";
 import About from "./routes/About";
 import Error from "./routes/Error";
 import Footer from "./routes/Footer";
+import Search from "./routes/Search";
+import Results from "./routes/Results";
 import '../public/bootstrap/css/bootstrap.min.css'
 
 import {
@@ -32,6 +34,16 @@ const router = createBrowserRouter([
   {
     path: "/about",
     element: <About/>,
+    errorElement: <ErrorBoundary />
+  },
+  {
+    path: "/search",
+    element: <Search/>,
+    errorElement: <ErrorBoundary />
+  },
+  {
+    path: "/query",
+    element: <Results/>,
     errorElement: <ErrorBoundary />
   },
   {

@@ -3,5 +3,8 @@
 	"port": 5432,
 	"database": "postgres",
 	"user": "postgres",
-	"password": "test1234"
+	"password": "test1234",
+	"ES_PASSWORD": "$ES_PASSWORD",
+	"ES_HOST": "$ES_HOST",
+	"ES_ENABLED": "$ES_ENABLED"
 }

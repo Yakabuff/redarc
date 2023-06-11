@@ -44,8 +44,16 @@ $ docker run \
 
 $ docker build . -t redarc
 
-$ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -d -p 80:80 -it redarc 
+# Without elasticsearch
+
+$ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -e ES_ENABLED=false -d -p 80:80 -it redarc 
+
+# With elasticsearch
+
+$ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -e ES_ENABLED=true -e ES_HOST=<http://es.mysite.org> -e ES_PASSWORD=<enteryourpasswordhere> -d -p 80:80 -it redarc 
+
 ```
+Note: The `ES_HOST` and `ES_PASSWORD` envars above are placeholders.  Enter your own credentials
 
 Ensure Python3 and PIP are installed:
 ```
@@ -55,7 +63,26 @@ python3 scripts/index.py [subreddit_name]
 # Optional
 python3 scripts/unlist.py <subreddit> <true|false>
 ```
+Optional: Setup elastic search
+```
+python3 scripts/ingest_comment.py <pushshift_dump> > example_es_comment
+python3 scripts/ingest_submission.py <pushshift_dump> > example_es_submission
+```
 
+Elasticsearch can only bulk insert files up to 100 MB in size.  We will need to split these files into chunks
+```
+split --verbose -l200000 example_es_comment example_es_comments.
+split --verbose -l200000 example_es_submission example_es_submission.
+```
+Ingest with elasticsearch API
+eg:
+```
+curl -u elastic:<password> -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk' --data-binary @example_es_comments.ad
+curl -u elastic:<password> -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk' --data-binary @example_es_comments.ab
+curl -u elastic:<password> -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk' --data-binary @example_es_comments.ac
+curl -u elastic:<password> -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk' --data-binary @example_es_comments.ad
+...
+```
 
 # Manual installation:
 

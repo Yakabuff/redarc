@@ -7,8 +7,8 @@ ES_ENABLED = os.environ["ES_ENABLED"]
 
 with open("config.json") as f:
     newText=f.read().replace('test1234', POSTGRES_PASSWORD)
-    newText=f.read().replace('$ES_PASSWORD', ES_PASSWORD)
-    newText=f.read().replace('$ES_HOST', ES_HOST)
-    newText=f.read().replace('"$ES_ENABLED"', ES_ENABLED)
+    newText=newText.replace('$ES_PASSWORD', ES_PASSWORD)
+    newText=newText.replace('$ES_HOST', ES_HOST)
+    newText=newText.replace('"$ES_ENABLED"', ES_ENABLED)
 with open("config.json", "w") as f:
     f.write(newText)

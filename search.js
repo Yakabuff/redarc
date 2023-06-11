@@ -112,7 +112,7 @@ router.get('/', function(req, res){
          res.json(result);
       }).catch((error)=> {
          res.sendStatus(500);
-         console.log(error)
+         // console.log(error)
          return;
       })
    } else {
@@ -187,7 +187,7 @@ router.get('/', function(req, res){
          res.json(result);
       }).catch((error)=> {
          res.sendStatus(500);
-         console.log(error)
+         // console.log(error)
          return;
       })
    }

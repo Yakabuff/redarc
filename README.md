@@ -64,24 +64,9 @@ python3 scripts/index.py [subreddit_name]
 python3 scripts/unlist.py <subreddit> <true|false>
 ```
 Optional: Setup elastic search
-```
-python3 scripts/ingest_comment.py <pushshift_dump> > example_es_comment
-python3 scripts/ingest_submission.py <pushshift_dump> > example_es_submission
-```
 
-Elasticsearch can only bulk insert files up to 100 MB in size.  We will need to split these files into chunks
 ```
-split --verbose -l200000 example_es_comment example_es_comments.
-split --verbose -l200000 example_es_submission example_es_submission.
-```
-Ingest with elasticsearch API
-eg:
-```
-curl -u elastic:<password> -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk' --data-binary @example_es_comments.ad
-curl -u elastic:<password> -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk' --data-binary @example_es_comments.ab
-curl -u elastic:<password> -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk' --data-binary @example_es_comments.ac
-curl -u elastic:<password> -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk' --data-binary @example_es_comments.ad
-...
+$ scripts/es_batch.sh <subreddit_name> <path_submission_dump> <path_comment_dump> <elasticsearch password>
 ```
 
 # Manual installation:

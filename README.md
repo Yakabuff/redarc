@@ -87,6 +87,8 @@ $ docker run \
 psql -h localhost -U postgres -a -f db_submissions.sql
 psql -h localhost -U postgres -a -f db_comments.sql
 psql -h localhost -U postgres -a -f db_subreddits.sql
+psql -h localhost -U postgres -a -f db_submissions_index.sql
+psql -h localhost -U postgres -a -f db_comments_index.sql
 ```
 
 ### 2) Process dump and insert rows into postgres database with the load_sub/load_comments scripts

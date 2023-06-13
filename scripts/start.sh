@@ -5,6 +5,8 @@ cd /redarc
 psql -h pgsql-dev -U postgres -a -f scripts/db_submissions.sql
 psql -h pgsql-dev -U postgres -a -f scripts/db_comments.sql
 psql -h pgsql-dev -U postgres -a -f scripts/db_subreddits.sql
+psql -h pgsql-dev -U postgres -a -f scripts/db_comments_index.sql
+psql -h pgsql-dev -U postgres -a -f scripts/db_submissions_index.sql
 
 # Update postgres password
 python3 scripts/express_config.py

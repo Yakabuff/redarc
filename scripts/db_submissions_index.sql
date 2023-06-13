@@ -1,0 +1,1 @@
+CREATE INDEX submissions_subreddit_idx on submissions(subreddit);

@@ -81,7 +81,7 @@ export default function Results(){
             <li><a href="/search">Search</a> <span class="divider">/</span></li>
          </ul>
          <div class="container-fluid">
-            <h3>Submission results for: </h3>
+            <h1>Submission results for: </h1>
             <code>{searchParams.get("search")}</code> in <code>{searchParams.get("subreddit")}</code>
             <br/>
             <button onClick={prev} class = "btn btn-link">Prev</button>

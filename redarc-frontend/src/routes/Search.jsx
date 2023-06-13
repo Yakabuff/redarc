@@ -46,10 +46,10 @@ export default function Search(){
 
       query_string = query_string + '&search=' + search;
       
-      const score = event.target.score.value;
-      if (score) {
-         query_string = query_string + '&score=' + score; 
-      }
+      // const score = event.target.score.value;
+      // if (score) {
+      //    query_string = query_string + '&score=' + score; 
+      // }
       navigate(query_string);
     };
    return (
@@ -75,8 +75,8 @@ export default function Search(){
                <input id="before" type="text" placeholder="2010-01-01"/>
                <label>After Date: </label>
                <input id="after" type="text" placeholder="2010-01-01"/>
-               <label>Score filter</label>
-               <input id="score" type="text" placeholder="Score filter eg: >100"/>
+               {/* <label>Score filter</label>
+               <input id="score" type="text" placeholder="Score filter eg: >100"/> */}
                <label>Search term</label>
                <input id="search" type="text"/>
             </fieldset>

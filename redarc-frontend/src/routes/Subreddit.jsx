@@ -56,6 +56,7 @@ export default function Subreddit(){
     <body style={{minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
     <ul class="breadcrumb">
       <li><a href="/">Index</a> <span class="divider">/</span></li>
+      <li><a href="/search">Search</a> <span class="divider">/</span></li>
     </ul>
     <div class="container">
 

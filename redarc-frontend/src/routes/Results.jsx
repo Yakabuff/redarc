@@ -39,6 +39,10 @@ export default function Results(){
    if (searchParams.get("type") === "submission") {
       return (
          <>
+         <ul class="breadcrumb">
+            <li><a href="/">Index</a> <span class="divider">/</span></li>
+            <li><a href="/search">Search</a> <span class="divider">/</span></li>
+         </ul>
          <div class="container-fluid">
             <h3>Submission results for: <code>{searchParams.get("search")}</code></h3>
             <table style={{border: "1px solid"}} id = "threads" class="table">

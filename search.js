@@ -32,6 +32,7 @@ router.get('/', function(req, res){
    const before = req.query.before;
 
    const search = req.query.search;
+
    // title/body if submission
    // comment body if comment
 
@@ -51,12 +52,6 @@ router.get('/', function(req, res){
             bool: {
                must: [
                   {
-                     multi_match: {
-                        "query": search, 
-                        "fields": [ "self_text", "title" ],
-                     },
-                  },
-                  {
                      match: {
                         "type": 'submission'
                      },
@@ -65,8 +60,25 @@ router.get('/', function(req, res){
                      match: {
                         "subreddit": subreddit
                      }
+                  },
+                  {
+                     bool: {
+                        should: [
+                           {
+                              match_phrase_prefix: {
+                                 "self_text": search, 
+                              }
+                           },
+                           {
+                              match_phrase_prefix: {
+                                 "title": search, 
+                              },
+                           },
+                        ]
+                     }
                   }
-               ]
+               ], 
+
             }
          }
       }
@@ -105,9 +117,9 @@ router.get('/', function(req, res){
          q['query']['bool']['filter'] = []
          q['query']['bool']['filter'].push(x)
       }else {
-         console.log('no dates')
+
       }
-   
+
       es_client.search(q).then((result) => {
          res.json(result);
       }).catch((error)=> {
@@ -130,7 +142,7 @@ router.get('/', function(req, res){
             bool: {
                must: [
                   {
-                     match: {
+                     match_phrase_prefix: {
                         "body": search, 
                      },
                   },

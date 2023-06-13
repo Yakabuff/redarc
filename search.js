@@ -31,6 +31,8 @@ router.get('/', function(req, res){
    const after = req.query.after;
    const before = req.query.before;
 
+   const sort = req.query.sort ? req.query.sort : "desc"
+
    const search = req.query.search;
 
    // title/body if submission
@@ -44,7 +46,7 @@ router.get('/', function(req, res){
          sort :[
             {"created_utc": 
                {
-                  "order" : "desc"
+                  "order" : sort
                }
             }
          ],
@@ -119,7 +121,7 @@ router.get('/', function(req, res){
       }else {
 
       }
-
+      // console.log(JSON.stringify(q))
       es_client.search(q).then((result) => {
          res.json(result);
       }).catch((error)=> {
@@ -134,7 +136,7 @@ router.get('/', function(req, res){
          sort :[
             {"created_utc": 
                {
-                  "order" : "desc"
+                  "order" : sort
                }
             }
          ],
@@ -179,6 +181,7 @@ router.get('/', function(req, res){
                }
             }
          }
+         q['query']['bool']['filter'] = []
          q['query']['bool']['filter'].push(x)
       } else if (after && before) {
          let x = {
@@ -194,7 +197,7 @@ router.get('/', function(req, res){
       }else {
 
       }
-
+      // console.log(JSON.stringify(q))
       es_client.search(q).then((result) => {
          res.json(result);
       }).catch((error)=> {

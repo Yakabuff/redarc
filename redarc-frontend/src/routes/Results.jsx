@@ -5,6 +5,43 @@ export default function Results(){
    const [results, setResults] = useState([]);
    const [searchParams, setSearchParams] = useSearchParams();
    const [errorMessage, setErrorMessage] = React.useState("");
+
+   const next = ()=>{
+      let table = document.getElementById('results')
+      let date = table.rows[ table.rows.length - 1 ].cells[0].id;
+      let query = searchParams.get("search");
+      let subreddit = searchParams.get("subreddit");
+      const type = searchParams.get("type");
+      fetch(import.meta.env.VITE_API_DOMAIN + "/search?subreddit="+subreddit+"&before="+date+"&search="+query+"&type="+type)
+      .then ((resp) => resp.json())
+      .then((data) => {
+         let x = data['hits']['hits']
+         x.map(z => {
+            z['_source']['datestring'] = new Date(z['_source']['created_utc']*1000).toLocaleDateString("en-US"); 
+         })
+         setResults(x)
+      })
+      .catch((error) => setResults([]));
+    }
+    const prev = ()=>{
+      let table = document.getElementById('results')
+      let date = table.rows[ 0 ].cells[0].id;
+      let query = searchParams.get("search");
+      let subreddit = searchParams.get("subreddit");
+      const type = searchParams.get("type");
+      fetch(import.meta.env.VITE_API_DOMAIN + "/search?subreddit="+subreddit+"&after="+date+"&search="+query+"&type="+type+"&sort=asc")
+      .then ((resp) => resp.json())
+      .then((data) => {
+         let x = data['hits']['hits']
+         x.map(z => {
+            z['_source']['datestring'] = new Date(z['_source']['created_utc']*1000).toLocaleDateString("en-US"); 
+         })
+         x.reverse()
+         setResults(x)
+      })
+      .catch((error) => setResults([]));
+    }
+
    useEffect(() => {
       let q = import.meta.env.VITE_API_DOMAIN 
       + "/search?type="+searchParams.get("type")
@@ -25,7 +62,7 @@ export default function Results(){
          // console.log(data['hits']['hits'])
          let x = data['hits']['hits']
          x.map(z => {
-            z['_source']['created_utc'] = new Date(z['_source']['created_utc']*1000).toLocaleDateString("en-US"); 
+            z['_source']['datestring'] = new Date(z['_source']['created_utc']*1000).toLocaleDateString("en-US"); 
          })
          document.title = 'Redarc - Results for ' + searchParams.get("search");
          setResults(x)
@@ -44,37 +81,53 @@ export default function Results(){
             <li><a href="/search">Search</a> <span class="divider">/</span></li>
          </ul>
          <div class="container-fluid">
-            <h3>Submission results for: <code>{searchParams.get("search")}</code></h3>
-            <table style={{border: "1px solid"}} id = "threads" class="table">
+            <h3>Submission results for: </h3>
+            <code>{searchParams.get("search")}</code> in <code>{searchParams.get("subreddit")}</code>
+            <br/>
+            <button onClick={prev} class = "btn btn-link">Prev</button>
+            <button onClick={next} class = "btn btn-link">Next</button>
+            <br/>
+            <table style={{border: "1px solid"}} id = "results" class="table">
                {results.map((result) => {
                   return (
                   <tr>
-                     <td> {result['_source']['created_utc']} </td>
+                     <td id={result['_source']['created_utc']}> {result['_source']['datestring']} </td>
                      <td> <a href = {"/r/"+searchParams.get("subreddit")+"/comments/"+result._id}>{result['_source']['title']} </a></td>
                      <td> {result._source.self_text} </td>
                   </tr>
                   );
                })}
             </table>
-          </div>
-          {errorMessage && <div class="alert alert-error"> {errorMessage} </div>}
+               <button onClick={prev} class = "btn btn-link">Prev</button>
+               <button onClick={next} class = "btn btn-link">Next</button>
+            <br/>
+         </div>
+         {errorMessage && <div class="alert alert-error"> {errorMessage} </div>}
           </>
       )
    } else if (searchParams.get("type") === "comment") {
       return (
          <>
          <div class="container-fluid">
-            <h1>Comment results for: <code>{searchParams.get("search")}</code></h1>
-            <table style={{border: "1px solid"}} id = "comments" class="table">
+            <h1>Comment results for: </h1>
+            <code>{searchParams.get("search")}</code> in <code>{searchParams.get("subreddit")}</code>
+            <br/>
+            <button onClick={prev} class = "btn btn-link">Prev</button>
+            <button onClick={next} class = "btn btn-link">Next</button>
+            <br/>
+            <table style={{border: "1px solid"}} id = "results" class="table">
                {results.map((result) => {
                   return (
                   <tr>
-                     <td> {result['_source']['created_utc']} </td>
+                     <td id={result['_source']['created_utc']}> {result['_source']['datestring']} </td>
                      <td> <a href = {"/r/"+searchParams.get("subreddit")+"/comments/"+result._source.link_id}>{result['_source']['body']} </a></td>
                   </tr>
                   );
                })}
             </table>
+               <button onClick={prev} class = "btn btn-link">Prev</button>
+               <button onClick={next} class = "btn btn-link">Next</button>
+            <br/>
          </div>
          {errorMessage && <div class="alert alert-error"> {errorMessage} </div>}
          </>

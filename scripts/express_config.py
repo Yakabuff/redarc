@@ -1,9 +1,21 @@
 import os
 
 POSTGRES_PASSWORD = os.environ["PGPASSWORD"]
-ES_PASSWORD = os.environ["ES_PASSWORD"]
-ES_HOST = os.environ["ES_HOST"]
-ES_ENABLED = os.environ["ES_ENABLED"]
+
+if "ES_PASSWORD" in os.environ:
+    ES_PASSWORD = os.environ["ES_PASSWORD"]
+else: 
+    ES_PASSWORD = ""
+
+if "ES_HOST" in os.environ:
+    ES_HOST = os.environ["ES_HOST"]
+else:
+    ES_HOST = "http://invalid.localhost"
+
+if "ES_ENABLED" in os.environ:
+    ES_ENABLED = os.environ["ES_ENABLED"]
+else:
+    ES_ENABLED = "false"
 
 with open("config.json") as f:
     newText=f.read().replace('test1234', POSTGRES_PASSWORD)

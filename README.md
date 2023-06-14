@@ -30,6 +30,10 @@ eg: `http://redarc.basedbin.org/api`.
 `SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.basedbin.org`
 
 ```
+$ git clone https://github.com/Yakabuff/redarc.git
+
+$ cd redarc
+
 $ docker network create redarc
 
 $ docker pull postgres
@@ -50,16 +54,29 @@ $ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SER
 
 # With elasticsearch
 
+# Install elasticsearch: https://www.elastic.co/guide/en/elastic-stack/current/index.html
+
 $ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -e ES_ENABLED=true -e ES_HOST=<http://es.mysite.org> -e ES_PASSWORD=<enteryourpasswordhere> -d -p 80:80 -it redarc 
 
 ```
 Note: The `ES_HOST` and `ES_PASSWORD` envars above are placeholders.  Enter your own credentials
 
-Ensure Python3 and PIP are installed:
+Ensure `python3`, `pip` and `pyscopg2-binary` are installed:
 ```
-python3 scripts/load_sub.py <submission_file.txt>
-python3 scripts/load_comments.py <comment_file.txt>
-python3 scripts/index.py [subreddit_name]
+# Decompress dumps
+
+$ unzstd <submission_file>.zst
+
+$ unzstd <comment_file>.zst
+
+$ pip install pyscopg2-binary
+
+$ python3 scripts/load_sub.py <path_to_submission_file>
+
+$ python3 scripts/load_comments.py <path_to_comment_file>
+
+$ python3 scripts/index.py [subreddit_name]
+
 # Optional
 python3 scripts/unlist.py <subreddit> <true|false>
 ```
@@ -84,20 +101,20 @@ $ docker run \
 ```
 
 ```
-psql -h localhost -U postgres -a -f db_submissions.sql
-psql -h localhost -U postgres -a -f db_comments.sql
-psql -h localhost -U postgres -a -f db_subreddits.sql
-psql -h localhost -U postgres -a -f db_submissions_index.sql
-psql -h localhost -U postgres -a -f db_comments_index.sql
+psql -h localhost -U postgres -a -f scripts/db_submissions.sql
+psql -h localhost -U postgres -a -f scripts/db_comments.sql
+psql -h localhost -U postgres -a -f scripts/db_subreddits.sql
+psql -h localhost -U postgres -a -f scripts/db_submissions_index.sql
+psql -h localhost -U postgres -a -f scripts/db_comments_index.sql
 ```
 
 ### 2) Process dump and insert rows into postgres database with the load_sub/load_comments scripts
 
 ```
-python3 load_sub.py <submission_file.txt>
-python3 load_comments.py <comment_file.txt>
-python3 index.py [subreddit_name]
-python3 unlist.py <subreddit> <true|false>
+python3 scripts/load_sub.py <path_to_submission_file>
+python3 scripts/load_comments.py <path_to_comment_file>
+python3 scripts/index.py [subreddit_name]
+python3 scripts/unlist.py <subreddit> <true|false>
 ```
 
 ### 3) Start the API server.
@@ -112,6 +129,7 @@ pm2 start server.js
 ### 4) Start the frontend
 
 ```
+cd redarc-frontend
 mv sample.env .env
 ```
 Set address for API server in the .env file
@@ -121,7 +139,6 @@ VITE_API_DOMAIN=http://my-api-server.com
 ```
 
 ```
-cd redarc-frontend
 npm i
 npm run dev // Dev server
 ```

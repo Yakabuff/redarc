@@ -1,5 +1,7 @@
 # redarc
-Here's how you can host your own Reddit archive.
+
+![Alt text](docs/screenshot.png "screenshot")
+
 ### Download pushshift dumps
 
 ```

@@ -1,1 +1,1 @@
-CREATE TABLE subreddits ( name TEXT PRIMARY KEY,  unlisted bool NOT NULL, num_submissions INT NOT NULL, num_comments INT NOT NULL);
+CREATE TABLE IF NOT EXISTS subreddits ( name TEXT PRIMARY KEY,  unlisted bool NOT NULL, num_submissions INT NOT NULL, num_comments INT NOT NULL);

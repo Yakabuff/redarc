@@ -1,1 +1,1 @@
-CREATE INDEX submissions_subreddit_idx on submissions(subreddit);
+CREATE INDEX IF NOT EXISTS submissions_subreddit_idx on submissions(subreddit);

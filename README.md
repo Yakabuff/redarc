@@ -180,9 +180,7 @@ systemctl restart nginx
 `search/comments?`
 - `[unflatten = <True/False>]`
 - `[subreddit = <name>]`
-- `[author = <name>]`
 - `[id = <id>]`
-- `[body = <content>]`
 - `[before = <utc_timestamp>]`
 - `[after = <utc_timestamp>]`
 - `[parent_id = <parent_id>]`
@@ -191,11 +189,17 @@ systemctl restart nginx
 
 `search/submissions?`
 - `[subreddit = <name>]`
-- `[author = <name>]`
 - `[id = <id>]`
-- `[title = <title>]`
 - `[before = <utc_timestamp>]`
 - `[after = <utc_timestamp>]`
-- `[sort = <ASC/DESC>]`
+- `[sort = <ASC|DESC>]`
 
 `search/subreddits`
+
+`search?`
+- `<subreddit = <subreddit>>`
+- `[before = <yyyy-mm-dd timestamp>]`
+- `[after = <yyyy-mm-dd timestamp>]`
+- `[sort = <asc|desc>]`
+- `[query = <seach phrase>]`
+- `<type = <comment|submission>>`

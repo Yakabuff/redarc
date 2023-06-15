@@ -15,22 +15,22 @@ router.get('/', function(req, res){
 		values.push(req.query.id)
 		text += ` id = \$${count}`
 	}
-	if (req.query.author) {
-		count = count + 1;
-		if (values.length != 0) {
-      text += ' and';
-		}
-		values.push(req.query.author.toLowerCase())
-		text += ` author = \$${count}`
-	}
-	if (req.query.body) {
-		count = count + 1;
-		if (values.length != 0) {
-      text += ' and';
-		}
-		values.push(req.query.body)
-		text += ` body = \$${count}`
-	}
+	// if (req.query.author) {
+	// 	count = count + 1;
+	// 	if (values.length != 0) {
+   //    text += ' and';
+	// 	}
+	// 	values.push(req.query.author.toLowerCase())
+	// 	text += ` author = \$${count}`
+	// }
+	// if (req.query.body) {
+	// 	count = count + 1;
+	// 	if (values.length != 0) {
+   //    text += ' and';
+	// 	}
+	// 	values.push(req.query.body)
+	// 	text += ` body = \$${count}`
+	// }
 	if (req.query.subreddit) {
 		count = count + 1;
 		if (values.length != 0) {
@@ -77,16 +77,19 @@ router.get('/', function(req, res){
 		text += ` ORDER BY created_utc DESC`
 	}
 	text += ` LIMIT 500`
-
-  pool.query(text, values)
-  .then(result => {
+	if (count === 0) {
+		res.sendStatus(500);
+		return
+	}
+  	pool.query(text, values)
+  	.then(result => {
 		query_results = result.rows;
 		if (req.query.unflatten && req.query.link_id) {
-      res.send(unflatten(result.rows, req.query.link_id));
+      	res.send(unflatten(result.rows, req.query.link_id));
 			return;
 		}
-    res.send(result.rows);
-  })
+   	res.send(result.rows);
+  	})
   .catch(e => {
 		console.error(e.stack);
 		res.sendStatus(500);

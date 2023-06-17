@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres
+    container_name: pgsql-dev
+    networks:
+      - redarc
+    environment:
+      POSTGRES_PASSWORD: test1234
+    volumes:
+      - pgredarc01:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redarc:
+    build: .
+    image: redarc
+    container_name: redarc
+    networks:
+      - redarc
+    environment:
+      REDARC_API: http://redarc.mysite.org/api/
+      SERVER_NAME: redarc.mysite.org
+      PGPASSWORD: test1234
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+
+networks:
+  redarc:
+    driver: bridge
+
+volumes:
+  pgredarc01:
+    driver: local

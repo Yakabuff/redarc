@@ -15,7 +15,9 @@ services:
       - "5432:5432"
 
   redarc:
-    build: .
+    build:
+      context: https://github.com/Yakabuff/redarc.git
+      dockerfile: Dockerfile
     image: redarc
     container_name: redarc
     networks:

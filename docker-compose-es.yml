@@ -44,7 +44,6 @@ services:
       - discovery.type=single-node
       - ELASTIC_PASSWORD=estest1234
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - "http.host=http://es.mysite.org"
     volumes:
       - esredarc01:/usr/share/elasticsearch/data
 

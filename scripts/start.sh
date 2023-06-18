@@ -25,7 +25,7 @@ cp -R dist/* /var/www/html/redarc/
 # NGINX config
 cd /redarc/nginx
 python3 nginx_envar.py $REDARC_API $SERVER_NAME
-mv redarc.conf /etc/nginx/conf.d/redarc.conf
+mv redarc.conf /etc/nginx/http.d/redarc.conf
 
 # Start nginx
 nginx -g "daemon off;"

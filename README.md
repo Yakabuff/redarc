@@ -31,6 +31,24 @@ eg: `http://redarc.basedbin.org/api`.
 
 `SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.basedbin.org`
 
+## Docker compose
+
+```
+$ wget https://raw.githubusercontent.com/Yakabuff/redarc/master/docker-compose.yml
+// Modify docker-compose.yml as-needed
+$ docker-compose up -d
+```
+
+Docker compose with elasticsearch
+
+```
+$ wget https://raw.githubusercontent.com/Yakabuff/redarc/master/docker-compose-es.yml
+// Modify docker-compose-es.yml as-needed
+$ docker-compose -f docker-compose-es.yml up -d
+```
+
+## Docker run
+
 ```
 $ git clone https://github.com/Yakabuff/redarc.git
 

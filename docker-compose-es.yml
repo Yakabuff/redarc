@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres
+    container_name: pgsql-dev
+    networks: 
+      - redarc
+    environment:
+      POSTGRES_PASSWORD: test1234
+    volumes:
+      - pgredarc01:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redarc:
+    build:
+      context: https://github.com/Yakabuff/redarc.git
+      dockerfile: Dockerfile
+    image: redarc
+    container_name: redarc
+    networks:
+      - redarc
+    environment:
+      REDARC_API: http://redarc.mysite.org/api/
+      SERVER_NAME: redarc.mysite.org
+      PGPASSWORD: test1234
+      ES_ENABLED: 'true'
+      ES_HOST: http://es.mysite.org
+      ES_PASSWORD: estest1234
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.1
+    container_name: es01
+    networks:
+      - redarc
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=estest1234
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    volumes:
+      - esredarc01:/usr/share/elasticsearch/data
+
+networks:
+  redarc:
+    driver: bridge
+
+volumes:
+  pgredarc01:
+    driver: local
+  esredarc01:
+    driver: local

@@ -30,7 +30,7 @@ services:
       ES_HOST: http://es.mysite.org
       ES_PASSWORD: estest1234
     ports:
-      - "8080:80"
+      - "80:80"
     depends_on:
       - postgres
       - elasticsearch

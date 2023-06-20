@@ -27,7 +27,7 @@ services:
       SERVER_NAME: redarc.mysite.org
       PGPASSWORD: test1234
     ports:
-      - "8080:80"
+      - "80:80"
     depends_on:
       - postgres
 

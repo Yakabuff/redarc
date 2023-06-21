@@ -15,12 +15,11 @@ Top 20,000 subreddits:
 ```
 magnet:?xt=urn:btih:c398a571976c78d346c325bd75c47b82edf6124e&tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce
 ```
+# Installation:
 
-# Docker (Recommended)
+## Docker 
 
 Install Docker: https://docs.docker.com/engine/install
-
-The following commands must be run in order.
 
 If you wish to change the postgres password, make sure `POSTGRES_PASSWORD` and `PGPASSWORD` are the same.
 
@@ -31,16 +30,20 @@ eg: `http://redarc.basedbin.org/api`.
 
 `SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.basedbin.org`
 
-## Docker compose
+## Docker compose (Recommended):
 
+Docker compose **without** elasticsearch:
+
+Modify envars `REDARC_API`, `SERVER_NAME`, `POSTGRES_PASSWORD`, `PGPASSWORD`, and ports as needed
 ```
 $ wget https://raw.githubusercontent.com/Yakabuff/redarc/master/docker-compose.yml
 // Modify docker-compose.yml as-needed
 $ docker-compose up -d
 ```
 
-Docker compose with elasticsearch
+Docker compose **with** elasticsearch:
 
+Modify envars `REDARC_API`, `SERVER_NAME`, `POSTGRES_PASSWORD`, `PGPASSWORD`, `ES_ENABLED`, `ES_HOST`, `ES_PASSWORD`, `ELASTIC_PASSWORD`, `ES_JAVA_OPTS`, and ports as needed
 ```
 $ wget https://raw.githubusercontent.com/Yakabuff/redarc/master/docker-compose-es.yml
 // Modify docker-compose-es.yml as-needed
@@ -48,6 +51,10 @@ $ docker-compose -f docker-compose-es.yml up -d
 ```
 
 ## Docker run
+
+Install Docker: https://docs.docker.com/engine/install
+
+The following commands must be run in order.
 
 ```
 $ git clone https://github.com/Yakabuff/redarc.git
@@ -81,33 +88,12 @@ $ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SER
 ```
 Note: The `ES_HOST` and `ES_PASSWORD` envars above are placeholders.  Enter your own credentials
 
-Ensure `python3`, `pip` and `pyscopg2-binary` are installed:
-```
-# Decompress dumps
-
-$ unzstd <submission_file>.zst
-
-$ unzstd <comment_file>.zst
-
-$ pip install pyscopg2-binary
-
-$ python3 scripts/load_sub.py <path_to_submission_file>
-
-$ python3 scripts/load_comments.py <path_to_comment_file>
-
-$ python3 scripts/index.py [subreddit_name]
-
-# Optional
-python3 scripts/unlist.py <subreddit> <true|false>
-```
-Optional: Setup elastic search
+## Manual installation:
 
 ```
-$ scripts/es_batch.sh <subreddit_name> <path_submission_dump> <path_comment_dump> <elasticsearch password>
+$ git clone https://github.com/Yakabuff/redarc.git
+$ cd redarc
 ```
-
-# Manual installation:
-
 ### 1) Provision Postgres database 
 
 ```
@@ -193,6 +179,39 @@ cd redarc-frontend
 npm run build 
 cp -R dist/* /var/www/html/redarc/
 systemctl restart nginx
+```
+
+# Ingest data:
+
+## Postgres:
+
+Ensure `python3`, `pip` and `pyscopg2-binary` are installed:
+```
+# Decompress dumps
+
+$ unzstd <submission_file>.zst
+
+$ unzstd <comment_file>.zst
+
+$ pip install pyscopg2-binary
+
+# Change database credentials if needed
+
+$ python3 scripts/load_sub.py <path_to_submission_file>
+
+$ python3 scripts/load_comments.py <path_to_comment_file>
+
+$ python3 scripts/index.py [subreddit_name]
+
+# Optional
+python3 scripts/unlist.py <subreddit> <true|false>
+```
+
+## Elasticsearch:
+
+Ingest an entire JSON dump:
+```
+$ scripts/es_batch.sh <batch_name> <path_submission_dump> <path_comment_dump> <elasticsearch password>
 ```
 
 # API:

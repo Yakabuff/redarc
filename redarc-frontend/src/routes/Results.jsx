@@ -16,9 +16,7 @@ export default function Results(){
       .then ((resp) => resp.json())
       .then((data) => {
          let x = data['hits']['hits']
-         x.map(z => {
-            z['_source']['datestring'] = new Date(z['_source']['created_utc']*1000).toLocaleDateString("en-US"); 
-         })
+         // console.log(x)
          setResults(x)
       })
       .catch((error) => setResults([]));
@@ -33,9 +31,6 @@ export default function Results(){
       .then ((resp) => resp.json())
       .then((data) => {
          let x = data['hits']['hits']
-         x.map(z => {
-            z['_source']['datestring'] = new Date(z['_source']['created_utc']*1000).toLocaleDateString("en-US"); 
-         })
          x.reverse()
          setResults(x)
       })
@@ -60,14 +55,13 @@ export default function Results(){
       .then ((resp) => resp.json())
       .then((data) => {
          // console.log(data['hits']['hits'])
+         // console.log(data)
          let x = data['hits']['hits']
-         x.map(z => {
-            z['_source']['datestring'] = new Date(z['_source']['created_utc']*1000).toLocaleDateString("en-US"); 
-         })
          document.title = 'Redarc - Results for ' + searchParams.get("search");
          setResults(x)
       })
       .catch((error) => {
+         // console.log(error)
          setResults([])
          setErrorMessage("Error 500. Something went wrong or searching is disabled")
       });
@@ -91,7 +85,7 @@ export default function Results(){
                {results.map((result) => {
                   return (
                   <tr>
-                     <td id={result['_source']['created_utc']}> {result['_source']['datestring']} </td>
+                     <td id={result['_source']['created_utc']}>{result['_source']['datestring']}</td>
                      <td> <a href = {"/r/"+searchParams.get("subreddit")+"/comments/"+result._id}>{result['_source']['title']} </a></td>
                      <td> {result._source.self_text} </td>
                   </tr>
@@ -108,6 +102,10 @@ export default function Results(){
    } else if (searchParams.get("type") === "comment") {
       return (
          <>
+         <ul class="breadcrumb">
+            <li><a href="/">Index</a> <span class="divider">/</span></li>
+            <li><a href="/search">Search</a> <span class="divider">/</span></li>
+        </ul>
          <div class="container-fluid">
             <h1>Comment results for: </h1>
             <code>{searchParams.get("search")}</code> in <code>{searchParams.get("subreddit")}</code>
@@ -119,7 +117,7 @@ export default function Results(){
                {results.map((result) => {
                   return (
                   <tr>
-                     <td id={result['_source']['created_utc']}> {result['_source']['datestring']} </td>
+                     <td id={result['_source']['created_utc']}>{result['_source']['datestring']}</td>
                      <td> <a href = {"/r/"+searchParams.get("subreddit")+"/comments/"+result._source.link_id}>{result['_source']['body']} </a></td>
                   </tr>
                   );

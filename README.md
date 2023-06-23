@@ -237,8 +237,8 @@ $ scripts/es_batch.sh <batch_name> <path_submission_dump> <path_comment_dump> <e
 
 `search?`
 - `<subreddit = <subreddit>>`
-- `[before = <yyyy-mm-dd timestamp>]`
-- `[after = <yyyy-mm-dd timestamp>]`
+- `[before = <unix timestamp>]`
+- `[after = <unix timestamp>]`
 - `[sort = <asc|desc>]`
 - `[query = <seach phrase>]`
 - `<type = <comment|submission>>`

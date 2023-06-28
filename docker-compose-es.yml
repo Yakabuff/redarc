@@ -27,7 +27,7 @@ services:
       SERVER_NAME: redarc.mysite.org
       PGPASSWORD: test1234
       ES_ENABLED: 'true'
-      ES_HOST: http://es.mysite.org
+      ES_HOST: http://es01:9200
       ES_PASSWORD: estest1234
     ports:
       - "80:80"
@@ -46,6 +46,8 @@ services:
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     volumes:
       - esredarc01:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
 
 networks:
   redarc:

@@ -43,7 +43,10 @@ $ docker-compose up -d
 
 Docker compose **with** elasticsearch:
 
-Modify envars `REDARC_API`, `SERVER_NAME`, `POSTGRES_PASSWORD`, `PGPASSWORD`, `ES_ENABLED`, `ES_HOST`, `ES_PASSWORD`, `ELASTIC_PASSWORD`, `ES_JAVA_OPTS`, and ports as needed
+Modify envars `REDARC_API`, `SERVER_NAME`, `POSTGRES_PASSWORD`, `PGPASSWORD`, `ES_ENABLED`, `ES_HOST`, `ES_PASSWORD`, `ELASTIC_PASSWORD`, `ES_JAVA_OPTS`, and ports as needed.
+
+Use `http://es01:9200` for `ES_HOST` if container is in the same docker network.
+
 ```
 $ wget https://raw.githubusercontent.com/Yakabuff/redarc/master/docker-compose-es.yml
 // Modify docker-compose-es.yml as-needed

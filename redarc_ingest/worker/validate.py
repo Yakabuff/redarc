@@ -106,9 +106,6 @@ def validate_comment(comment):
       subreddit = comment.subreddit.display_name.strip().lower()
    else:
       return None
-   print(comment.author)
-   print(comment.id)
-   print(comment.body)
    if comment.author and isinstance(comment.author.name, str):
       author = comment.author.name.strip().lower()
    else:

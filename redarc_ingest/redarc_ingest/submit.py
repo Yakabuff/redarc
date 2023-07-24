@@ -3,9 +3,17 @@ import re
 from .conn import url_queue
 import falcon
 from worker.reddit_worker import fetch_thread
+import os
+
 class Submit:
 
     def on_get(self, req, resp):
+
+      if os.getenv('INGEST_ENABLED') == 'false':
+        resp.text = json.dumps({"status": "ingest disabled", "url": url}, ensure_ascii=False)
+        resp.status = falcon.HTTP_500
+        return        
+
       url = req.get_param('url')
       if 'redd.it' in url:
         if re.search(r'\S+redd\.it\/\S+\/?$', url) == None:

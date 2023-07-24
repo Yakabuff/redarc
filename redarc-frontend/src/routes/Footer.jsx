@@ -6,7 +6,6 @@ export default function Footer(){
          <br/>
          <ul style = {{display: 'inline', listStyleType: 'none'}}>
             <li style = {{display: 'inline', paddingRight: 10+'px'}}><small><a href="https://github.com/yakabuff/redarc">redarc</a></small></li>
-            <li style = {{display: 'inline', paddingRight: 10+'px'}}><small><a href="http://basedbin.org">basedbin.org</a></small></li>
             <li style = {{display: 'inline', paddingRight: 10+'px'}}><small><a href="/about">FAQ</a></small></li>
          </ul>
          </div>

@@ -1,6 +1,7 @@
 import falcon
 from .submit import Submit
-import queue
+from dotenv import load_dotenv
+load_dotenv()
 
 app = application = falcon.App()
 

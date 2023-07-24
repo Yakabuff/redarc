@@ -76,20 +76,20 @@ def find_ids():
 
    cursor.execute('select id from status_submissions where visible = true and retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
    ids = sum(tuple(cursor.fetchall()), ())
+   if len(ids) > 0:
+      cursor.execute('select * from submissions where id in %s', (ids,))
+      subs = cursor.fetchall()
+      res = bulk_insert('submissions', subs)
+      update_indexed_status("subsmissions", res)
 
-   cursor.execute('select * from submissions where id in %s', (ids,))
-   subs = cursor.fetchall()
-   res = bulk_insert('submissions', subs)
-   update_indexed_status("subsmissions", res)
-
-   cursor.execute('select id from status_comments where visible = true and retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
-   ids = sum(tuple(cursor.fetchall()), ())
-   cursor.execute('select * from comments where id in %s', (ids,))
-   coms = cursor.fetchall()
-   res = bulk_insert('comments', coms)
-   update_indexed_status("comments", res)
-   pg_con.commit()
-   pg_pool.putconn(pg_con)
+      cursor.execute('select id from status_comments where visible = true and retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
+      ids = sum(tuple(cursor.fetchall()), ())
+      cursor.execute('select * from comments where id in %s', (ids,))
+      coms = cursor.fetchall()
+      res = bulk_insert('comments', coms)
+      update_indexed_status("comments", res)
+      pg_con.commit()
+      pg_pool.putconn(pg_con)
 
 def update_indexed_status(_type, res):
    _type = "status_comments" if _type == "comments" else "status_submissions"
@@ -114,10 +114,30 @@ def update_indexed_status(_type, res):
    print(rows_to_update)
    execute_values(cursor, sql, rows_to_update)
 
+def index_db():
+   try:
+      cursor.execute("select DISTINCT subreddit from submissions;")
+      subreddits = cursor.fetchall()
+      cursor.execute("DELETE from subreddits;")
+      for row in subreddits:
+         logging.info("Updating index table:" + str(row[0]))
+         cursor.execute("select COUNT(*) from submissions where subreddit = %s;", (row))
+         num_submissions = cursor.fetchone()
+
+         cursor.execute("select COUNT(*) from comments where subreddit = %s;", (row))
+         num_comments = cursor.fetchone()
+
+         cursor.execute("INSERT INTO subreddits (name, unlisted, num_submissions, num_comments) VALUES (%s, %s, %s, %s) ON CONFLICT (name) DO UPDATE SET(num_submissions, num_comments) = (%s, %s)",(row, False, num_submissions, num_comments, num_submissions, num_comments))
+      pg_con.commit()
+      pg_con.close()
+   except Exception as error:
+      logging.error(error)
 if __name__ == "__main__":
    time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
-   logging.basicConfig(filename='es_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
+   logging.basicConfig(filename='index_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
    while True:
-      find_ids()
+      if os.getenv('ES_ENABLED'):
+         find_ids()
+      index_db()
       time.sleep(3600)
 

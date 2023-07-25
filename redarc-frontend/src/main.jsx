@@ -8,6 +8,7 @@ import Error from "./routes/Error";
 import Footer from "./routes/Footer";
 import Search from "./routes/Search";
 import Results from "./routes/Results";
+import Submit from "./routes/Submit";
 import '../public/bootstrap/css/bootstrap.min.css'
 
 import {
@@ -44,6 +45,12 @@ const router = createBrowserRouter([
   {
     path: "/query",
     element: <Results/>,
+    errorElement: <ErrorBoundary />
+  },
+  {
+    path: "/submit",
+    exact: true,
+    element: <Submit/>,
     errorElement: <ErrorBoundary />
   },
   {

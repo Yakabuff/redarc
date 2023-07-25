@@ -5,3 +5,4 @@ postgres-docker
 */dist
 config.json
 *.log
+redarc-ingest*

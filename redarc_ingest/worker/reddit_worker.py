@@ -52,13 +52,13 @@ def insert_db(_type, data):
             cursor.execute('INSERT INTO submissions(id, subreddit, title, author, permalink, thumbnail, num_comments, url, score, gilded, created_utc, self_text, is_self) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, to_timestamp(%s), %s, %s) ON CONFLICT (id) DO NOTHING',
                             [data['id'], data['subreddit'], data['title'], data['author'], data['permalink'], data['thumbnail'], data['num_comments'], data['url'], data['score'], data['gilded'], data['created_utc'], data['selftext'], data['is_self']])
             cursor.execute('UPDATE submissions SET num_comments=GREATEST(num_comments, %s), gilded=GREATEST(gilded, %s), score=%s where id =%s', [data['num_comments'], data['gilded'], data['score'], data['id']])
-            cursor.execute('INSERT INTO status_submissions(id, visible, retrieved_utc, indexed_utc) VALUES (%s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [data['id'], True, int(time.time()), None])
+            cursor.execute('INSERT INTO status_submissions(id, retrieved_utc, indexed_utc) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING', [data['id'], int(time.time()), None])
         else:
             cursor.execute('INSERT INTO comments(id, subreddit, body, author, score, gilded, created_utc, parent_id, link_id) VALUES (%s, %s, %s, %s, %s, %s, to_timestamp(%s), %s, %s) ON CONFLICT (id) DO NOTHING',
                             [data['id'], data['subreddit'], data['body'], data['author'], data['score'], data['gilded'], data['created_utc'], data['parent_id'], data['link_id']])
             cursor.execute('UPDATE comments SET gilded=GREATEST(gilded, %s), score=%s where id =%s',
                             [data['gilded'], data['score'], data['id']])
-            cursor.execute('INSERT INTO status_comments(id, visible, retrieved_utc, indexed_utc) VALUES (%s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [data['id'], True, int(time.time()), None])
+            cursor.execute('INSERT INTO status_comments(id, retrieved_utc, indexed_utc) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING', [data['id'], int(time.time()), None])
         
         pg_con.commit()
         pg_pool.putconn(pg_con)

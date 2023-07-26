@@ -13,27 +13,62 @@ services:
       - pgredarc01:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h",  "pgsql-dev", "-U", "postgres"]
+      timeout: 10s
+      retries: 10
 
   redarc:
     build:
-      context: https://github.com/Yakabuff/redarc.git
+      context: .
       dockerfile: Dockerfile
     image: redarc
     container_name: redarc
     networks:
       - redarc
     environment:
+      # Replace redarc.mysite.org with your hostname
       REDARC_API: http://redarc.mysite.org/api/
+      REDARC_SUBMIT: http://redarc.mysite.org/submit/
       SERVER_NAME: redarc.mysite.org
       PGPASSWORD: test1234
     ports:
       - "80:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
+  redarc_ingest:
+    build:
+      context: ./redarc_ingest
+      dockerfile: Dockerfile
+    image: redarc_ingest
+    container_name: redarc_ingest
+    networks:
+      - redarc
+    environment:
+      INGEST_ENABLED: true
+      PG_DATABASE: postgres
+      PG_USER: postgres
+      PG_PASSWORD: test1234
+      PG_HOST: pg-sql
+      PG_PORT: 5432
+      ES_ENABLED: false
+      # Reddit credentials
+      CLIENT_ID: change me
+      CLIENT_SECRET: change me
+      PASSWORD: change me
+      USER_AGENT: "my user agent"
+      REDDIT_USERNAME: "change me"
+      INDEX_DELAY: 300
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 networks:
   redarc:
     driver: bridge
+    name: redarc
 
 volumes:
   pgredarc01:

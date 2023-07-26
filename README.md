@@ -34,21 +34,23 @@ eg: `http://redarc.basedbin.org/api`.
 
 Docker compose **without** elasticsearch:
 
-Modify envars `REDARC_API`, `SERVER_NAME`, `POSTGRES_PASSWORD`, `PGPASSWORD`, and ports as needed
+Modify envars as needed
 ```
-$ wget https://raw.githubusercontent.com/Yakabuff/redarc/master/docker-compose.yml
+$ git clone https://github.com/Yakabuff/redarc.git
+$ cd redarc
 // Modify docker-compose.yml as-needed
 $ docker-compose up -d
 ```
 
 Docker compose **with** elasticsearch:
 
-Modify envars `REDARC_API`, `SERVER_NAME`, `POSTGRES_PASSWORD`, `PGPASSWORD`, `ES_ENABLED`, `ES_HOST`, `ES_PASSWORD`, `ELASTIC_PASSWORD`, `ES_JAVA_OPTS`, and ports as needed.
+Modify envars as needed.
 
 Use `http://es01:9200` for `ES_HOST` if container is in the same docker network.
 
 ```
-$ wget https://raw.githubusercontent.com/Yakabuff/redarc/master/docker-compose-es.yml
+$ git clone https://github.com/Yakabuff/redarc.git
+$ cd redarc
 // Modify docker-compose-es.yml as-needed
 $ docker-compose -f docker-compose-es.yml up -d
 ```
@@ -188,7 +190,7 @@ systemctl restart nginx
 
 ## Postgres:
 
-Ensure `python3`, `pip` and `pyscopg2-binary` are installed:
+Ensure `python3`, `pip` and `psycopg2-binary` are installed:
 ```
 # Decompress dumps
 
@@ -245,3 +247,7 @@ $ scripts/es_batch.sh <batch_name> <path_submission_dump> <path_comment_dump> <e
 - `[sort = <asc|desc>]`
 - `[query = <seach phrase>]`
 - `<type = <comment|submission>>`
+
+# License:
+
+Redarc is licensed under the MIT license

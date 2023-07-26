@@ -11,13 +11,11 @@ from dotenv import load_dotenv
 import logging
 
 load_dotenv()
-
-es_client = Elasticsearch(os.getenv('ES_HOST'), basic_auth=(os.getenv('ES_USER'), os.getenv('ES_PASSWORD')))
+if os.getenv('ES_ENABLED').lower() == 'true':
+   es_client = Elasticsearch(os.getenv('ES_HOST'), basic_auth=(os.getenv('ES_USER'), os.getenv('ES_PASSWORD')))
 pg_con = pg_pool.getconn()
 cursor = pg_con.cursor()
-# every x minutes iterate through every file.
-# if > 50 mb, index and delete file
-# if time delta > x minutes, index and delete file
+
 def bulk_insert(_type, data):
    actions = []
 
@@ -30,7 +28,7 @@ def bulk_insert(_type, data):
          meta = json.dumps(
             {
                'create': {
-                  '_index':'redarc_comments_tmp',
+                  '_index':'redarc_comments',
                   "_id": id,
                },
             }
@@ -51,7 +49,7 @@ def bulk_insert(_type, data):
          meta = json.dumps(
             {
                'create': {
-                  '_index':'redarc_tmp',
+                  '_index':'redarc',
                   "_id": id,
                },
             }
@@ -74,7 +72,7 @@ def bulk_insert(_type, data):
 # find n ids starting with lowest retrieved_utc and index_utc == None
 def find_ids():
 
-   cursor.execute('select id from status_submissions where visible = true and retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
+   cursor.execute('select id from status_submissions where retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
    ids = sum(tuple(cursor.fetchall()), ())
    if len(ids) > 0:
       cursor.execute('select * from submissions where id in %s', (ids,))
@@ -82,7 +80,7 @@ def find_ids():
       res = bulk_insert('submissions', subs)
       update_indexed_status("subsmissions", res)
 
-      cursor.execute('select id from status_comments where visible = true and retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
+      cursor.execute('select id from status_comments where retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
       ids = sum(tuple(cursor.fetchall()), ())
       cursor.execute('select * from comments where id in %s', (ids,))
       coms = cursor.fetchall()
@@ -136,8 +134,8 @@ if __name__ == "__main__":
    time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
    logging.basicConfig(filename='index_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
    while True:
-      if os.getenv('ES_ENABLED'):
+      if os.getenv('ES_ENABLED').lower() == 'true':
          find_ids()
       index_db()
-      time.sleep(3600)
+      time.sleep(os.getenv('INDEX_DELAY'))
 

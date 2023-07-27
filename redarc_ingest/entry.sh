@@ -28,10 +28,12 @@ redis-server &
 
 # Start gunicorn
 gunicorn -b 0.0.0.0:8000 --reload redarc_ingest.app &
-# Start reddit worker
-python3 -m worker.reddit_worker &
 
-# Start index worker
-python3 -m worker.index_worker &
+if ["$INGEST_ENABLED" == "true"] ; then
+   # Start reddit worker
+   python3 -m worker.reddit_worker &
 
+   # Start index worker
+   python3 -m worker.index_worker &
+fi
 wait

@@ -19,8 +19,9 @@ export default function Submit(){
       }
       request = request + 'url=' + url;
       fetch(import.meta.env.VITE_SUBMIT_DOMAIN + request)
-      .then ((resp) => {
-         if (resp.status === 200) {
+      .then (resp => resp.json())
+      .then((data) => {
+         if (data.status === 'success') {
             setErrorMessage("Thread submitted! Check back in a bit.")
          } else {
             setErrorMessage("Failed to submit thread");

@@ -2,6 +2,7 @@ import calendar
 import datetime
 import json
 import os
+import sys
 import time
 from psycopg2.extras import execute_values
 from worker.con import pg_pool
@@ -137,5 +138,5 @@ if __name__ == "__main__":
       if os.getenv('ES_ENABLED').lower() == 'true':
          find_ids()
       index_db()
-      time.sleep(os.getenv('INDEX_DELAY'))
+      time.sleep(int(os.getenv('INDEX_DELAY')))
 

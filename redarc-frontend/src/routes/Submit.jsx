@@ -6,8 +6,9 @@ export default function Submit(){
    const navigate = useNavigate();
    const handleSubmit = event => {
       event.preventDefault();
-      let request = '/submit?';
+      let request = '/submit';
       const url = event.target.url.value;
+      const password = event.target.password.value;
       //\S+reddit\.com\/r\/\S+\/comments\/\S+\/\S+\/?$
       //\S+redd\.it\/\S+\/?$
       const regexShort = new RegExp(/\S+redd\.it\/\S+\/?$/);
@@ -17,17 +18,33 @@ export default function Submit(){
          setErrorMessage("Invalid url: Must be in the format https://redd.it/123asf or https://www.reddit.com/r/foo/comments/asdf123/bar/")
          return;
       }
-      request = request + 'url=' + url;
-      fetch(import.meta.env.VITE_SUBMIT_DOMAIN + request)
-      .then (resp => resp.json())
-      .then((data) => {
-         if (data.status === 'success') {
-            setErrorMessage("Thread submitted! Check back in a bit.")
+
+      fetch(import.meta.env.VITE_SUBMIT_DOMAIN + request, {
+         headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+         method: "POST",
+         body: JSON.stringify({'url': url, 'password': password})
+      })
+      .then (resp => {
+         if (resp['status'] === 401) {
+            throw new Error("Invalid password")
          } else {
-            setErrorMessage("Failed to submit thread");
+            return resp.json()
          }
       })
-      .catch((error) => {setErrorMessage("Failed to submit thread");});
+      .then((data) => {
+         if (data.status === 'success') {
+            throw new Error("Thread submitted! Check back in a bit.")
+         } else {
+            throw new Error("Failed to submit thread");
+         }
+      })
+      .catch((error) => {
+         console.log(error)
+         setErrorMessage(error.message);
+      });
     };
    return (
       <>
@@ -40,8 +57,10 @@ export default function Submit(){
          <h1>Submit:</h1>
          <form onSubmit={handleSubmit}>
             <fieldset>
-            <label>Search for: </label>
+               <label>Submit thread URL: </label>
                <input id="url" type="text" placeholder="redd.it/asdf213"/>
+               <label>Password: Leave blank if no password set</label>
+               <input id="password" type="text" placeholder="password"/>
             </fieldset>
             <button type="submit" class="btn btn-primary">Submit</button>
          </form>

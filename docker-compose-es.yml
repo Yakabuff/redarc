@@ -85,6 +85,7 @@ services:
       USER_AGENT: "my user agent"
       REDDIT_USERNAME: "change me"
       INDEX_DELAY: 300
+      INGEST_PASSWORD: asdf
     depends_on:
       postgres:
         condition: service_healthy

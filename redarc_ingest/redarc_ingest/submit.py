@@ -7,14 +7,21 @@ import os
 
 class Submit:
 
-    def on_get(self, req, resp):
+    def on_post(self, req, resp):
 
       if os.getenv('INGEST_ENABLED') == 'false':
         resp.text = json.dumps({"status": "ingest disabled", "url": url}, ensure_ascii=False)
         resp.status = falcon.HTTP_500
         return        
+      obj = req.get_media()
+      url = obj.get('url')
+      pw = obj.get('password')
 
-      url = req.get_param('url')
+      if os.getenv('INGEST_PASSWORD'):
+        if pw != os.getenv('INGEST_PASSWORD'):
+          resp.status = falcon.HTTP_401
+          return
+
       if 'redd.it' in url:
         if re.search(r'\S+redd\.it\/\S+\/?$', url) == None:
           resp.text = json.dumps({"status": "invalid url", "url": url}, ensure_ascii=False)

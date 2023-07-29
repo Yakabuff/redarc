@@ -17,7 +17,7 @@ def validate_submission(submission):
    else:
       title = ""
 
-   if submission.author.name and isinstance(submission.author.name, str):
+   if submission.author and isinstance(submission.author.name, str):
       author = submission.author.name.strip().replace("\u0000", "").lower()
    else:
       author = "[unknown]"

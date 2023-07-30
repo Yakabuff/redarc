@@ -86,6 +86,8 @@ services:
       REDDIT_USERNAME: "change me"
       INDEX_DELAY: 300
       INGEST_PASSWORD: asdf
+    volumes:
+      - redarc_ingest_logs:/ingest/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,4 +103,6 @@ volumes:
   pgredarc01:
     driver: local
   esredarc01:
+    driver: local
+  redarc_ingest_logs:
     driver: local

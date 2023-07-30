@@ -8,6 +8,7 @@ from enum import Enum
 import time
 from rq import Worker
 from redarc_ingest.conn import redis_conn
+import os
 """
 Redarc worker
 
@@ -21,27 +22,27 @@ class type(Enum):
 
 def fetch_thread(thread_id):
     logging.info("Fetching submission "+ str(thread_id))
-    submission = reddit.submission(id=thread_id)
-    process_submission(submission)
-    comments = submission.comments
-    comments.replace_more(limit=None)
-    for comment in comments.list():
-        process_comment(comment)
+    try:
+        submission = reddit.submission(id=thread_id)
+        process_submission(submission)
+        comments = submission.comments
+        comments.replace_more(limit=None)
+        for comment in comments.list():
+            process_comment(comment)
+    except Exception as error:
+        logging.error(error)
 
 def process_submission(submission):
     x = validate_submission(submission)
     logging.info("Processing submission: " + x['id'])
     if x != None:
         insert_db(type.SUBMISSION, x)
-        # queue_index(type.SUBMISSION, x)
-
 
 def process_comment(comment):
     x = validate_comment(comment)
     logging.info("Processing comments: " + x['id'])
     if x != None:
         insert_db(type.COMMENT, x)
-        # queue_index(type.COMMENT, x)
 
 def insert_db(_type, data):
     try:
@@ -68,6 +69,11 @@ def insert_db(_type, data):
 
 if __name__ == "__main__":
     time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
-    logging.basicConfig(filename='reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
-    w = Worker(['url_submit'], connection=redis_conn)
-    w.work()
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    logging.basicConfig(filename='logs/reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
+    try:
+        w = Worker(['url_submit'], connection=redis_conn)
+        w.work()
+    except Exception as error:
+        logging.error(error)

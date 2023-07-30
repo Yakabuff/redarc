@@ -2,7 +2,6 @@ import calendar
 import datetime
 import json
 import os
-import sys
 import time
 from psycopg2.extras import execute_values
 from worker.con import pg_pool
@@ -133,7 +132,9 @@ def index_db():
       logging.error(error)
 if __name__ == "__main__":
    time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
-   logging.basicConfig(filename='index_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
+   if not os.path.exists('logs'):
+      os.makedirs('logs')
+   logging.basicConfig(filename='logs/index_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
    while True:
       if os.getenv('ES_ENABLED').lower() == 'true':
          find_ids()

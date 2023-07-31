@@ -1,6 +1,27 @@
 # redarc
+A self-hosted solution to search, view and create your own Reddit archives.
+
+- Ingest pushshift dumps
+- View threads/comments
+- Elasticsearch support
+- Submit threads to be archived via API (Completely untested)
+
+Please abide by the Reddit Terms of Service and [User Agreement](https://www.redditinc.com/policies/user-agreement-april-18-2023) if you are using their API
+
+TL;DR you are not allowed to distribute or host Reddit comments and threads
+<details>
+
+```
+Except and solely to the extent such a restriction is impermissible under applicable law, you may not, without our written agreement:
+
+license, sell, transfer, assign, distribute, host, or otherwise commercially exploit the Services or Content;
+modify, prepare derivative works of, disassemble, decompile, or reverse engineer any part of the Services or Content; or
+access the Services or Content in order to build a similar or competitive website, product, or service, except as permitted under any Additional Terms (as defined below).
+```
+</details>
 
 ![Alt text](docs/screenshot.png "screenshot")
+![Alt text](docs/screenshot2.png "screenshot2")
 
 ### Download pushshift dumps
 
@@ -26,9 +47,12 @@ If you wish to change the postgres password, make sure `POSTGRES_PASSWORD` and `
 If you are using redarc on your personal machine, set docker envars `REDARC_API=http://localhost/api` and `SERVER_NAME=localhost`.
 
 `REDARC_API` is the URL of your API server; it must end with `/api` 
-eg: `http://redarc.basedbin.org/api`.  
+eg: `http://redarc.mysite.org/api`.  
 
-`SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.basedbin.org`
+`REDARC_SUBMIT` is the URL of your submission service; it must end with `/ingest` 
+eg: `http://redarc.mysite.org/ingest`.  
+
+`SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.mysite.org`
 
 ## Docker compose (Recommended):
 
@@ -39,7 +63,7 @@ Modify envars as needed
 $ git clone https://github.com/Yakabuff/redarc.git
 $ cd redarc
 // Modify docker-compose.yml as-needed
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
 Docker compose **with** elasticsearch:
@@ -52,46 +76,8 @@ Use `http://es01:9200` for `ES_HOST` if container is in the same docker network.
 $ git clone https://github.com/Yakabuff/redarc.git
 $ cd redarc
 // Modify docker-compose-es.yml as-needed
-$ docker-compose -f docker-compose-es.yml up -d
+$ docker compose -f docker-compose-es.yml up -d
 ```
-
-## Docker run
-
-Install Docker: https://docs.docker.com/engine/install
-
-The following commands must be run in order.
-
-```
-$ git clone https://github.com/Yakabuff/redarc.git
-
-$ cd redarc
-
-$ docker network create redarc
-
-$ docker pull postgres
-
-$ docker run \
-  --name pgsql-dev \
-  --network redarc \
-  -e POSTGRES_PASSWORD=test1234 \
-  -d \
-  -v ${PWD}/postgres-docker:/var/lib/postgresql/data \
-  -p 5432:5432 postgres 
-
-$ docker build . -t redarc
-
-# Without elasticsearch
-
-$ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -e ES_ENABLED=false -d -p 80:80 -it redarc 
-
-# With elasticsearch
-
-# Install elasticsearch: https://www.elastic.co/guide/en/elastic-stack/current/index.html
-
-$ docker run --network redarc -e REDARC_API=http://redarc.mysite.org/api/ -e SERVER_NAME=redarc.mysite.org -e PGPASSWORD=test1234 -e ES_ENABLED=true -e ES_HOST=<http://es.mysite.org> -e ES_PASSWORD=<enteryourpasswordhere> -d -p 80:80 -it redarc 
-
-```
-Note: The `ES_HOST` and `ES_PASSWORD` envars above are placeholders.  Enter your own credentials
 
 ## Manual installation:
 
@@ -117,6 +103,10 @@ psql -h localhost -U postgres -a -f scripts/db_comments.sql
 psql -h localhost -U postgres -a -f scripts/db_subreddits.sql
 psql -h localhost -U postgres -a -f scripts/db_submissions_index.sql
 psql -h localhost -U postgres -a -f scripts/db_comments_index.sql
+psql -h localhost -U postgres -a -f scripts/db_status_comments.sql
+psql -h localhost -U postgres -a -f scripts/db_status_comments_index.sql
+psql -h localhost -U postgres -a -f scripts/db_status_submissions.sql
+psql -h localhost -U postgres -a -f scripts/db_status_submissions_index.sql
 ```
 
 ### 2) Process dump and insert rows into postgres database with the load_sub/load_comments scripts
@@ -133,7 +123,10 @@ python3 scripts/unlist.py <subreddit> <true|false>
 ```
 npm i
 node server.js
+```
 OR
+```
+npm install pm2
 pm2 start server.js
 ```
 
@@ -146,7 +139,8 @@ mv sample.env .env
 Set address for API server in the .env file
 
 ```
-VITE_API_DOMAIN=http://my-api-server.com
+VITE_API_DOMAIN=http://my-api-server.com/api/
+VITE_SUBMIT_DOMAIN=http://my-submit-server.com/ingest/
 ```
 
 ```
@@ -156,29 +150,12 @@ npm run dev // Dev server
 
 ### 5) Provision NGINX (Optional)
 
-/etc/nginx/conf.d/redarc.conf
+Edit nginx/nginx_original.conf with your own values
+```
+$ cd redarc
+$ mv nginx/redarc_original.conf /etc/nginx/conf.d/redarc.conf
+```
 
-```
-server{
-    listen 80;
-    listen [::]:80;
-    server_name example.com;
-    location ^~ /api/ {
-        proxy_redirect http://localhost:3000 http://example.com/api/;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header Host $http_host;
-        proxy_pass http://127.0.0.1:3000/;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_http_version 1.1;
-    }
-    root /var/www/html/redarc;
-    index index.html;
-    location / {
-    try_files $uri /index.html;
-    }
-}
-```
 ```
 cd redarc-frontend
 npm run build 
@@ -218,6 +195,10 @@ Ingest an entire JSON dump:
 ```
 $ scripts/es_batch.sh <batch_name> <path_submission_dump> <path_comment_dump> <elasticsearch password>
 ```
+
+## Web:
+
+- Submit Reddit URL using the web form `/submit`
 
 # API:
 

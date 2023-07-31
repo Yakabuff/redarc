@@ -4,7 +4,7 @@ A self-hosted solution to search, view and create your own Reddit archives.
 - Ingest pushshift dumps
 - View threads/comments
 - Elasticsearch support
-- Submit threads to be archived via API (Completely untested)
+- Submit threads to be archived via API (Completely untested.  Developed with mock data and the [PRAW](https://praw.readthedocs.io/en/stable/) documentation)
 
 Please abide by the Reddit Terms of Service and [User Agreement](https://www.redditinc.com/policies/user-agreement-april-18-2023) if you are using their API
 
@@ -53,6 +53,8 @@ eg: `http://redarc.mysite.org/api`.
 eg: `http://redarc.mysite.org/ingest`.  
 
 `SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.mysite.org`
+
+Setting an `INGEST_PASSWORD` in redarc_ingest is highly recommended to prevent abuse.
 
 ## Docker compose (Recommended):
 
@@ -161,6 +163,28 @@ cd redarc-frontend
 npm run build 
 cp -R dist/* /var/www/html/redarc/
 systemctl restart nginx
+```
+
+### 6) Setup submission workers
+
+Fill in .env files with your own credentials.
+
+Setting an `INGEST_PASSWORD` is highly recommended in order to prevent abuse.
+
+```
+$ cd redarc/redarc_ingest
+$ python -m venv venv
+$ source venv/bin/activate
+$ pip install gunicorn
+$ pip install falcon
+$ pip install rq
+$ pip install python-dotenv
+$ pip install elasticsearch
+$ pip install praw
+$ pip install psycopg2-binary
+$ gunicorn --reload redarc_ingest.app &
+$ python3 -m worker.reddit_worker &
+$ python3 -m worker.index_worker &
 ```
 
 # Ingest data:

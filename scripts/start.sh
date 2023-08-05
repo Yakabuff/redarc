@@ -11,6 +11,7 @@ psql -h pgsql-dev -U postgres -a -f scripts/db_status_comments.sql
 psql -h pgsql-dev -U postgres -a -f scripts/db_status_comments_index.sql
 psql -h pgsql-dev -U postgres -a -f scripts/db_status_submissions.sql
 psql -h pgsql-dev -U postgres -a -f scripts/db_status_submissions_index.sql
+psql -h pgsql-dev -U postgres -a -f scripts/db_progress.sql
 
 # Update postgres password
 python3 scripts/express_config.py

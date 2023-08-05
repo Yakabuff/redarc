@@ -72,7 +72,8 @@ def bulk_insert(_type, data):
 # find n ids starting with lowest retrieved_utc and index_utc == None
 def find_ids():
 
-   cursor.execute('select id from status_submissions where retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
+   cursor.execute('''select id from status_submissions where retrieved_utc is not NULL
+      and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000''')
    ids = sum(tuple(cursor.fetchall()), ())
    if len(ids) > 0:
       cursor.execute('select * from submissions where id in %s', (ids,))
@@ -80,7 +81,8 @@ def find_ids():
       res = bulk_insert('submissions', subs)
       update_indexed_status("subsmissions", res)
 
-      cursor.execute('select id from status_comments where retrieved_utc is not NULL and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000')
+      cursor.execute('''select id from status_comments where retrieved_utc is not NULL
+         and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000''')
       ids = sum(tuple(cursor.fetchall()), ())
       cursor.execute('select * from comments where id in %s', (ids,))
       coms = cursor.fetchall()
@@ -99,7 +101,6 @@ def update_indexed_status(_type, res):
    from (values %s) as t(id, time)
    where status_submissions.id = t.id;
    """
-   print(sql)
    rows_to_update = []
    for i in res['items']:
       if 'error' in i['create']:
@@ -125,7 +126,9 @@ def index_db():
          cursor.execute("select COUNT(*) from comments where subreddit = %s;", (row))
          num_comments = cursor.fetchone()
 
-         cursor.execute("INSERT INTO subreddits (name, unlisted, num_submissions, num_comments) VALUES (%s, %s, %s, %s) ON CONFLICT (name) DO UPDATE SET(num_submissions, num_comments) = (%s, %s)",(row, False, num_submissions, num_comments, num_submissions, num_comments))
+         cursor.execute("""INSERT INTO subreddits (name, unlisted, num_submissions, num_comments)
+            VALUES (%s, %s, %s, %s) ON CONFLICT (name) DO UPDATE SET(num_submissions, num_comments) = (%s, %s)""",
+            (row, False, num_submissions, num_comments, num_submissions, num_comments))
       pg_con.commit()
       pg_con.close()
    except Exception as error:

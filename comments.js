@@ -76,7 +76,9 @@ router.get('/', function(req, res){
 	} else {
 		text += ` ORDER BY created_utc DESC`
 	}
-	text += ` LIMIT 500`
+	if (!req.query.link_id && !req.query.parent_id) {
+		text += ` LIMIT 500`
+	}
 	if (count === 0) {
 		res.sendStatus(500);
 		return
@@ -98,7 +100,7 @@ router.get('/', function(req, res){
 })
  
 function unflatten(data, root) {
-  // Turn array of comments into hashmap. Add empty array field replies to comment obj
+  	// Turn array of comments into hashmap. Add empty array field replies to comment obj
 	// Iterate over keys
 	// If comment's parent is root, push to commentTree list. These are top level comments
 	// find parent comment in hashmap and append this comment into parent's reply. 
@@ -111,7 +113,7 @@ function unflatten(data, root) {
 	let parentID = comment.parent_id;
 		
 	if (parentID == root) {
-	commentTree.push(comment);
+		commentTree.push(comment);
 	} else {
 		if (lookup[parentID] == undefined) {
 			commentTree.push({body: "[comment not found]", author: "[unknown]", id: commentID, replies: [comment], parent_id: root, link_id: root})

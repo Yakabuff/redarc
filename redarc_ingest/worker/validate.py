@@ -94,7 +94,7 @@ def validate_submission(submission):
         "thumbnail": thumbnail,
         "score": score,
         "gilded": gilded,
-    }
+   }
 
 def validate_comment(comment):
    if comment.id and isinstance(comment.id, str):

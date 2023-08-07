@@ -17,10 +17,16 @@ if "ES_ENABLED" in os.environ:
 else:
     ES_ENABLED = "false"
 
+if "ADMIN_PASSWORD" in os.environ:
+    ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+else:
+    ADMIN_PASSWORD = "asdf"
+
 with open("config.json") as f:
     newText=f.read().replace('test1234', POSTGRES_PASSWORD)
     newText=newText.replace('$ES_PASSWORD', ES_PASSWORD)
     newText=newText.replace('$ES_HOST', ES_HOST)
     newText=newText.replace('"$ES_ENABLED"', ES_ENABLED)
+    newText=newText.replace('$ADMIN_PASSWORD', ADMIN_PASSWORD)
 with open("config.json", "w") as f:
     f.write(newText)

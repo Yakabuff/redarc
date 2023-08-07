@@ -32,6 +32,7 @@ services:
       REDARC_SUBMIT: http://redarc.mysite.org/submit/
       SERVER_NAME: redarc.mysite.org
       PGPASSWORD: test1234
+      ADMIN_PASSWORD: "qwerty"
     ports:
       - "80:80"
     depends_on:

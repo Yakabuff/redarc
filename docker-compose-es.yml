@@ -35,6 +35,7 @@ services:
       # Do not change ES_HOST if elastichost is running on the same machine
       ES_HOST: http://es01:9200
       ES_PASSWORD: estest1234
+      ADMIN_PASSWORD: "qwerty"
     ports:
       - "80:80"
     depends_on:

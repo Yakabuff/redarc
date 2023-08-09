@@ -23,6 +23,7 @@ export default function Root() {
           <li><a href="/search">Search</a> <span class="divider">/</span></li>
           <li><a href="/submit">Submit</a> <span class="divider">/</span></li>
           <li><a href="/progress">Progress</a> <span class="divider">/</span></li>
+          <li><a href="/about">FAQ</a> <span class="divider">/</span></li>
         </ul>
         <h1> Redarc </h1>
 

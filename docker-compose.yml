@@ -52,7 +52,7 @@ services:
       PG_DATABASE: postgres
       PG_USER: postgres
       PG_PASSWORD: test1234
-      PG_HOST: pg-sql
+      PG_HOST: pgsql-dev
       PG_PORT: 5432
       ES_ENABLED: false
       # Reddit credentials

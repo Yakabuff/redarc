@@ -1,5 +1,5 @@
 var express = require('express');
-var pool = require('./pool');
+var db = require('./pool');
 var CONFIG = require('./config.json');
 
 router = express.Router();
@@ -12,7 +12,7 @@ router.post('/', function(req, res) {
    }
    let text = 'SELECT * FROM progress ORDER BY start_utc DESC LIMIT 200';
 
-   pool.query(text)
+   db.pool.query(text)
    .then(result => {
       res.json(result.rows);
    })

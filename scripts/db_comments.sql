@@ -1,1 +1,1 @@
-CREATE TABLE IF NOT EXISTS comments ( id TEXT PRIMARY KEY, subreddit TEXT NOT NULL, body TEXT NOT NULL, author TEXT NOT NULL, score INT NOT NULL, gilded INT, created_utc TIMESTAMP NOT NULL, parent_id TEXT NOT NULL, link_id TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS comments ( id TEXT PRIMARY KEY, subreddit TEXT NOT NULL, body TEXT NOT NULL, author TEXT NOT NULL, score INT NOT NULL, gilded INT, created_utc BIGINT NOT NULL, parent_id TEXT NOT NULL, link_id TEXT NOT NULL, retrieved_utc BIGINT NOT NULL);

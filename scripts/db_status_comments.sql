@@ -1,1 +1,1 @@
-CREATE TABLE IF NOT EXISTS status_comments ( id TEXT PRIMARY KEY, retrieved_utc INT, indexed_utc INT);
+CREATE TABLE IF NOT EXISTS search_status_comments (created_utc BIGINT, retrieved_utc BIGINT);

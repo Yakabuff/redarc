@@ -1,5 +1,5 @@
 var express = require('express');
-var pool = require('./pool');
+var db = require('./pool');
 router = express.Router();
 
 router.get('/', function (req, res) {
@@ -7,7 +7,7 @@ router.get('/', function (req, res) {
    console.log(id)
    let text = 'SELECT job_id, start_utc, finish_utc, error FROM progress WHERE job_id = $1';
 
-   pool.query(text, [id])
+   db.pool.query(text, [id])
    .then(result => {
       res.json(result.rows);
    })

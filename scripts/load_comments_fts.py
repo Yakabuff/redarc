@@ -6,7 +6,7 @@ import logging
 import datetime
 
 time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
-logging.basicConfig(filename='comments-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='commentsfts-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
 
 filename = sys.argv[1]
 conn = psycopg2.connect(
@@ -14,7 +14,7 @@ conn = psycopg2.connect(
   user='postgres',
   password='test1234',
   host='localhost',
-  port='5432'
+  port='5433'
 )
 line_number = 0
 cursor = conn.cursor()
@@ -38,13 +38,6 @@ with open(filename) as file:
         logging.error("Could not find subreddit for: " + identifier)
         logging.debug("Line number: "+ str(line_number))
         continue
-
-      if 'author' in com_dict and isinstance(com_dict['author'], str):
-        author = com_dict['author'].strip().lower()
-      else:
-        logging.warning("Could not find author in " + identifier)
-        logging.debug("Line number: "+ str(line_number))
-        author = "[unknown]"
       
       if 'score' in com_dict and isinstance(com_dict['score'], int):
         score = com_dict['score']
@@ -91,29 +84,16 @@ with open(filename) as file:
         logging.debug("Line number: "+ str(line_number))
         continue
 
-      if 'parent_id' in com_dict and isinstance(com_dict['parent_id'], str):
-        if len(com_dict['parent_id'].split('_')) > 1:
-          parent_id = com_dict['parent_id'].strip().split('_')[1]
-        else:
-          parent_id = com_dict['parent_id'].strip()
-      else:
-        logging.warning("Could not find parent_id in " + identifier)
-        logging.debug("Line number: "+ str(line_number))
-        parent_id = link_id
-
       try:
-        cursor.execute('INSERT INTO comments(id, subreddit, body, author, score, gilded, created_utc, parent_id, link_id, retrieved_utc) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, subreddit, body, author, score, gilded, created_utc, parent_id, link_id, int(time.time())])
+        cursor.execute('INSERT INTO comments(id, subreddit, body, score, gilded, created_utc, link_id) VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, subreddit, body, score, gilded, created_utc, link_id])
       except Exception as error:
         logging.error("ERROR:" + str(error))
         logging.debug(identifier)
         logging.debug(subreddit)
         logging.debug(body)
-        logging.debug(author)
         logging.debug(score)
         logging.debug(gilded)
         logging.debug(created_utc)
-        logging.debug(parent_id)
-        logging.debug(link_id)
         continue
 conn.commit()
 conn.close()

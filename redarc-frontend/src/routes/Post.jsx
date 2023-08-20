@@ -1,4 +1,4 @@
-import { useParams} from 'react-router';
+import React, { useEffect, useState } from 'react';
 export default function Post(props){
    const title = props.title
    const author = props.author
@@ -10,6 +10,7 @@ export default function Post(props){
    const self_text = props.body;
    const url = props.url;
    const thumbnail = props.thumbnail;
+   const gilded = props.gilded;
 
    const toggle = () =>{
       let x = document.getElementById("thumbnail");
@@ -23,7 +24,13 @@ export default function Post(props){
    return(
       <div>
          <h1>{title}</h1>
-         <h4><span class="label label-info">{type}</span>  <span class="label label-success">Anonymous</span>  <span class="label label-important">⬆ {score}</span>  <span class="label label-info">{date}</span>  <span class="label label-default">{num_comments} comments</span></h4>
+         <h4>
+            <span class="label label-info">{type}</span>&nbsp;
+            <span class="label label-success">Anonymous</span>&nbsp;
+            <span class="label label-important">⬆ {score} 🪙 {gilded}</span>&nbsp;
+            {date != null && <span class="label label-info">{new Date(parseInt(date) * 1000).toISOString()}</span>}&nbsp;
+            <span class="label label-default">{num_comments} comments</span>
+         </h4>
          {is_self ? <div class="well"><p style={{overflowWrap: 'break-word'}}>{self_text}</p></div> : <div class="well"><p style={{overflowWrap: 'break-word'}}><small>{url}</small></p></div>}
          <img src={thumbnail} class="img-rounded" id="thumbnail"></img>
          <a onClick={toggle}><small>Toggle thumbnail</small></a>

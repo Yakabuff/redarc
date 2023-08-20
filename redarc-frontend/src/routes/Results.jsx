@@ -15,9 +15,7 @@ export default function Results(){
       fetch(import.meta.env.VITE_API_DOMAIN + "/search?subreddit="+subreddit+"&before="+date+"&search="+query+"&type="+type)
       .then ((resp) => resp.json())
       .then((data) => {
-         let x = data['hits']['hits']
-         // console.log(x)
-         setResults(x)
+         setResults(data)
       })
       .catch((error) => setResults([]));
     }
@@ -30,9 +28,8 @@ export default function Results(){
       fetch(import.meta.env.VITE_API_DOMAIN + "/search?subreddit="+subreddit+"&after="+date+"&search="+query+"&type="+type+"&sort=asc")
       .then ((resp) => resp.json())
       .then((data) => {
-         let x = data['hits']['hits']
-         x.reverse()
-         setResults(x)
+         data.reverse()
+         setResults(data)
       })
       .catch((error) => setResults([]));
     }
@@ -56,9 +53,8 @@ export default function Results(){
       .then((data) => {
          // console.log(data['hits']['hits'])
          // console.log(data)
-         let x = data['hits']['hits']
          document.title = 'Redarc - Results for ' + searchParams.get("search");
-         setResults(x)
+         setResults(data)
       })
       .catch((error) => {
          // console.log(error)
@@ -85,9 +81,9 @@ export default function Results(){
                {results.map((result) => {
                   return (
                   <tr>
-                     <td id={result['_source']['created_utc']}>{result['_source']['datestring']}</td>
-                     <td> <a href = {"/r/"+searchParams.get("subreddit")+"/comments/"+result._id}>{result['_source']['title']} </a></td>
-                     <td> {result._source.self_text} </td>
+                     <td id={result['created_utc']}>{new Date(result['created_utc'] * 1000).toISOString()}</td>
+                     <td> <a href = {"/r/"+searchParams.get("subreddit")+"/comments/"+result['id']}>{result['title']} </a></td>
+                     <td> {result['self_text']} </td>
                   </tr>
                   );
                })}
@@ -117,8 +113,8 @@ export default function Results(){
                {results.map((result) => {
                   return (
                   <tr>
-                     <td id={result['_source']['created_utc']}>{result['_source']['datestring']}</td>
-                     <td> <a href = {"/r/"+searchParams.get("subreddit")+"/comments/"+result._source.link_id}>{result['_source']['body']} </a></td>
+                     <td id={result['created_utc']}>{new Date(result['created_utc'] * 1000).toISOString()}</td>
+                     <td> <a href = {"/r/"+searchParams.get("subreddit")+"/comments/"+result['link_id']}>{result['body']} </a></td>
                   </tr>
                   );
                })}

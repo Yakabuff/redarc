@@ -1,12 +1,12 @@
 var express = require('express');
-var pool = require('./pool');
+var db = require('./pool');
 router = express.Router();
 
 router.get('/', function(req, res){
 
 	let text = 'SELECT * FROM subreddits'
 
-  pool.query(text)
+  db.pool.query(text)
   .then(result => {
       let subreddits = result.rows.filter(sub => 
         sub['unlisted'] === false

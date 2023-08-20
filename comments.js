@@ -1,5 +1,5 @@
 var express = require('express');
-var pool = require('./pool');
+var db = require('./pool');
 router = express.Router();
 
 router.get('/', function(req, res){
@@ -45,7 +45,7 @@ router.get('/', function(req, res){
       text += ' and';
 		}
 		values.push(req.query.after)
-		text += ` created_utc > TO_TIMESTAMP(\$${count})`
+		text += ` created_utc > \$${count}`
 	}
 	if (req.query.before) {
 		count = count + 1;
@@ -53,7 +53,7 @@ router.get('/', function(req, res){
       text += ' and';
 		}
 		values.push(req.query.before)
-		text += ` created_utc < TO_TIMESTAMP(\$${count})`
+		text += ` created_utc < \$${count}`
 	} 
 	if (req.query.parent_id) {
 		count = count + 1;
@@ -83,7 +83,7 @@ router.get('/', function(req, res){
 		res.sendStatus(500);
 		return
 	}
-  	pool.query(text, values)
+  	db.pool.query(text, values)
   	.then(result => {
 		query_results = result.rows;
 		if (req.query.unflatten && req.query.link_id) {

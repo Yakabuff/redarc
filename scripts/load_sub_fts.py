@@ -6,7 +6,7 @@ import logging
 import datetime
 
 time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
-logging.basicConfig(filename='submission-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='submissionfts-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
 
 filename = sys.argv[1]
 conn = psycopg2.connect(
@@ -14,7 +14,7 @@ conn = psycopg2.connect(
   user='postgres',
   password='test1234',
   host='localhost',
-  port='5432'
+  port='5433'
 )
 line_number = 0
 cursor = conn.cursor()
@@ -50,20 +50,6 @@ with open(filename) as file:
         logging.debug("Line number: "+ str(line_number))
         title = ""
 
-      if 'author' in sub_dict and isinstance(sub_dict['author'], str):
-        author = sub_dict['author'].strip().replace("\u0000", "").lower()
-      else:
-        logging.warning("Could not find author in " + identifier)
-        logging.debug("Line number: "+ str(line_number))
-        author = "[unknown]"
-
-      if 'permalink' in sub_dict and isinstance(sub_dict['permalink'], str):
-        permalink = sub_dict['permalink'].strip().replace("\u0000", "")
-      else:
-        logging.warning("Could not find permalink in " + identifier)
-        logging.debug("Line number: "+ str(line_number))
-        permalink = f'/r/{subreddit}/comments/{identifier}/foobar'
-
       if 'num_comments' in sub_dict and isinstance(sub_dict['num_comments'], int):
         num_comments = sub_dict['num_comments']
       elif 'num_comments' in sub_dict and isinstance(sub_dict['num_comments'], str) and sub_dict['num_comments'].isdigits():
@@ -72,13 +58,6 @@ with open(filename) as file:
         logging.warning("Could not find num_comments in " + identifier)
         logging.debug("Line number: "+ str(line_number))
         num_comments = 0
-
-      if 'url' in sub_dict and isinstance(sub_dict['url'], str):
-        url = sub_dict['url'].strip().replace("\u0000", "")
-      else:
-        url = f'http://reddit.com/r/{subreddit}/comments/{identifier}/blah'
-        logging.warning("Could not find url in " + identifier)
-        logging.debug("Line number: "+ str(line_number))
 
       if 'score' in sub_dict and isinstance(sub_dict['score'], int):
         score = sub_dict['score']
@@ -114,42 +93,19 @@ with open(filename) as file:
         logging.debug("Line number: "+ str(line_number))
         self_text = ""
 
-      if 'is_self' in sub_dict and isinstance(sub_dict['is_self'], bool):
-        is_self = sub_dict['is_self']
-      else:
-        logging.warning("Could not find is_self in " + identifier)
-        logging.debug("Line number: "+ str(line_number))
-        # Guess if self post
-        is_self = True if "reddit.com/r/" in url else False
-
-      if 'thumbnail' in sub_dict and isinstance(sub_dict['thumbnail'], str):
-        thumbnail = sub_dict['thumbnail'].strip().replace("\u0000", "")
-      else:
-        logging.warning("Could not find thumbnail in " + identifier)
-        logging.debug("Line number: "+ str(line_number))
-        if is_self:
-          thumbnail = "self"
-        else:
-          thumbnail = "default"
-
       try:
-        cursor.execute('INSERT INTO submissions(id, subreddit, title, author, permalink, thumbnail, num_comments, url, score, gilded, created_utc, self_text, is_self, retrieved_utc) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, subreddit, title, author, permalink, thumbnail, num_comments, url, score, gilded, created_utc, self_text, is_self, int(time.time())])
+        cursor.execute('INSERT INTO submissions(id, subreddit, title, num_comments, score, gilded, created_utc, self_text) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, subreddit, title, num_comments, score, gilded, created_utc, self_text])
       except Exception as error:
         logging.error("ERROR: "+ str(error))
         logging.debug("Line number: "+ str(line_number))
         logging.debug(identifier)
         logging.debug(subreddit)
         logging.debug(title)
-        logging.debug(author)
-        logging.debug(permalink)
-        logging.debug(thumbnail)
         logging.debug(num_comments)
-        logging.debug(url)
         logging.debug(score)
         logging.debug(gilded)
         logging.debug(created_utc)
         logging.debug(self_text)
-        logging.debug(is_self)
         logging.debug("================================")
         continue
 conn.commit()

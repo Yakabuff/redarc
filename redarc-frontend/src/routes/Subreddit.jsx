@@ -17,7 +17,7 @@ export default function Subreddit(){
 
   const next = ()=>{
     let table = document.getElementById('threads')
-    let  date = table.rows[ table.rows.length - 1 ].cells[2].innerHTML;
+    let  date = table.rows[ table.rows.length - 1 ].cells[2].id;
 
     fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&before="+date)
     .then ((resp) => resp.json())
@@ -28,7 +28,7 @@ export default function Subreddit(){
   }
   const prev = ()=>{
     let table = document.getElementById('threads');
-    let date = table.rows[ 0 ].cells[2].innerHTML;
+    let date = table.rows[ 0 ].cells[2].id;
 
 
     fetch(import.meta.env.VITE_API_DOMAIN + "/search/submissions?subreddit="+subreddit+"&after="+date+"&sort=ASC")
@@ -63,25 +63,25 @@ export default function Subreddit(){
     <h1>/r/{subreddit}</h1>
 
     <select name="year" id="year" onChange={jump}>
-      <option value="2023-01-01T00:00:00.000Z">2023</option>
-      <option value="2022-01-01T00:00:00.000Z">2022</option>
-      <option value="2021-01-01T00:00:00.000Z">2021</option>
-      <option value="2020-01-01T00:00:00.000Z">2020</option>
-      <option value="2019-01-01T00:00:00.000Z">2019</option>
-      <option value="2018-01-01T00:00:00.000Z">2018</option>
-      <option value="2017-01-01T00:00:00.000Z">2017</option>
-      <option value="2016-01-01T00:00:00.000Z">2016</option>
-      <option value="2015-01-01T00:00:00.000Z">2015</option>
-      <option value="2014-01-01T00:00:00.000Z">2014</option>
-      <option value="2013-01-01T00:00:00.000Z">2013</option>
-      <option value="2012-01-01T00:00:00.000Z">2012</option>
-      <option value="2011-01-01T00:00:00.000Z">2011</option>
-      <option value="2010-01-01T00:00:00.000Z">2010</option>
-      <option value="2009-01-01T00:00:00.000Z">2009</option>
-      <option value="2008-01-01T00:00:00.000Z">2008</option>
-      <option value="2007-01-01T00:00:00.000Z">2007</option>
-      <option value="2006-01-01T00:00:00.000Z">2006</option>
-      <option value="2005-01-01T00:00:00.000Z">2005</option>
+      <option value="1672531200">2023</option>
+      <option value="1640995200">2022</option>
+      <option value="1609459200">2021</option>
+      <option value="1577836800">2020</option>
+      <option value="1546300800">2019</option>
+      <option value="1514764800">2018</option>
+      <option value="1483228800">2017</option>
+      <option value="1451606400">2016</option>
+      <option value="1420070400">2015</option>
+      <option value="1388534400">2014</option>
+      <option value="1356998400">2013</option>
+      <option value="1325376000">2012</option>
+      <option value="1293840000">2011</option>
+      <option value="1262304000">2010</option>
+      <option value="1230768000">2009</option>
+      <option value="1199145600">2008</option>
+      <option value="1167609600">2007</option>
+      <option value="1136073600">2006</option>
+      <option value="1104537600">2005</option>
     </select>
     <br/>
     <button onClick={prev} class = "btn btn-link">Prev</button>
@@ -95,7 +95,7 @@ export default function Subreddit(){
               <tr>
                 <td> <span class="label label-info">{thread.is_self ? "self" : "link"}</span></td>
                 <td> <a href = {`/r/${subreddit}/comments/${thread.id}`}>{thread.title}</a></td>
-                <td> {thread.created_utc} </td>
+                <td id={thread.created_utc}> {new Date(thread.created_utc * 1000).toISOString()} </td>
                 <td> ⬆ {thread.score}</td>
                 <td>🥇 {thread.gilded} </td>
                 <td> 💬 {thread.num_comments}</td>

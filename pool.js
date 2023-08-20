@@ -9,8 +9,16 @@ const pool = new Pool({
 	password: CONFIG.password
 })
 
-// var timestampOID = 1114;
-types.setTypeParser(1114, function(stringValue) {
-  return stringValue;
+const ftspool = new Pool({
+	host: CONFIG.ftshost, 
+	port: CONFIG.ftsport,
+	database: CONFIG.ftsdatabase,
+	user: CONFIG.ftsuser,
+	password: CONFIG.ftspassword
 })
-module.exports = pool;
+
+// var timestampOID = 1114;
+// types.setTypeParser(1114, function(stringValue) {
+//   return stringValue;
+// })
+module.exports = {pool, ftspool};

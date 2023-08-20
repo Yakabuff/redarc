@@ -1,7 +1,6 @@
 import datetime
 import logging
 from worker.validate import validate_submission, validate_comment
-from worker.con import reddit
 from worker.con import pg_pool
 import time
 from enum import Enum
@@ -80,25 +79,22 @@ def insert_db(_type, data):
         cursor = pg_con.cursor()
         if _type == type.SUBMISSION:
             cursor.execute('''INSERT INTO submissions(id, subreddit, title, author, permalink,
-                thumbnail, num_comments, url, score, gilded, created_utc, self_text, is_self)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, to_timestamp(%s), %s, %s) ON CONFLICT (id) DO NOTHING''',
+                thumbnail, num_comments, url, score, gilded, created_utc, self_text, is_self, retrieved_utc)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING''',
                 [data['id'], data['subreddit'], data['title'], data['author'], data['permalink'], data['thumbnail'],
-                data['num_comments'], data['url'], data['score'], data['gilded'], data['created_utc'], data['selftext'], data['is_self']])
+                data['num_comments'], data['url'], data['score'], data['gilded'], data['created_utc'], data['selftext'], data['is_self'], int(time.time())])
             
             cursor.execute('UPDATE submissions SET num_comments=GREATEST(num_comments, %s), gilded=GREATEST(gilded, %s), score=%s where id =%s',
                             [data['num_comments'], data['gilded'], data['score'], data['id']])
-            cursor.execute('INSERT INTO status_submissions(id, retrieved_utc, indexed_utc) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING',
-                            [data['id'], int(time.time()), None])
+
         else:
-            cursor.execute('''INSERT INTO comments(id, subreddit, body, author, score, gilded, created_utc, parent_id, link_id)
-                VALUES (%s, %s, %s, %s, %s, %s, to_timestamp(%s), %s, %s) ON CONFLICT (id) DO NOTHING''',
+            cursor.execute('''INSERT INTO comments(id, subreddit, body, author, score, gilded, created_utc, parent_id, link_id, retrieved_utc)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING''',
                 [data['id'], data['subreddit'], data['body'], data['author'], data['score'], data['gilded'],
-                data['created_utc'], data['parent_id'], data['link_id']])
-            
+                data['created_utc'], data['parent_id'], data['link_id'], int(time.time())])
+
             cursor.execute('UPDATE comments SET gilded=GREATEST(gilded, %s), score=%s where id =%s',
                             [data['gilded'], data['score'], data['id']])
-            cursor.execute('''INSERT INTO status_comments(id, retrieved_utc, indexed_utc) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING''',
-                            [data['id'], int(time.time()), None])
         
         pg_con.commit()
         pg_pool.putconn(pg_con)
@@ -107,6 +103,14 @@ def insert_db(_type, data):
         logging.error(error)
 
 if __name__ == "__main__":
+    import praw
+    reddit = praw.Reddit(
+        client_id=os.getenv('CLIENT_ID'),
+        client_secret=os.getenv('CLIENT_SECRET'),
+        password=os.getenv('PASSWORD'),
+        user_agent=os.getenv('USER_AGENT'),
+        username=os.getenv('REDDIT_USERNAME'),
+    )
     time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
     if not os.path.exists('logs'):
         os.makedirs('logs')

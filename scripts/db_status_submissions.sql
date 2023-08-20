@@ -1,1 +1,1 @@
-CREATE TABLE IF NOT EXISTS status_submissions ( id TEXT PRIMARY KEY, retrieved_utc INT, indexed_utc INT);
+CREATE TABLE IF NOT EXISTS search_status_submissions (created_utc BIGINT, retrieved_utc BIGINT);

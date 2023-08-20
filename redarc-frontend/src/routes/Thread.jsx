@@ -57,7 +57,7 @@ export default function Thread(){
                     author = {comment.author}
                     score = {comment.score}
                     gilded = {comment.gilded}
-                    date = {comment.created_utc}
+                    date = {new Date(parseInt(comment.created_utc * 1000)).toISOString()}
                     replies = {comment.replies}
                     depth = {0} />
                 )

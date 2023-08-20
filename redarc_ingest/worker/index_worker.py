@@ -1,119 +1,99 @@
-import calendar
 import datetime
-import json
 import os
 import time
-from psycopg2.extras import execute_values
-from worker.con import pg_pool
-from elasticsearch import Elasticsearch
-from elasticsearch import helpers
+from worker.con import pg_pool, pg_pool_fts
 from dotenv import load_dotenv
 import logging
+from psycopg2.extensions import AsIs
 
 load_dotenv()
-if os.getenv('ES_ENABLED').lower() == 'true':
-   es_client = Elasticsearch(os.getenv('ES_HOST'), basic_auth=(os.getenv('ES_USER'), os.getenv('ES_PASSWORD')))
 pg_con = pg_pool.getconn()
 cursor = pg_con.cursor()
 
-def bulk_insert(_type, data):
-   actions = []
+def insert_search(_type, data):
+   #Insert data into postgres fts
+   
+   pgfts_con = pg_pool_fts.getconn()
+   cursor = pgfts_con.cursor()
 
+   insert_submission = """
+   insert into submissions (id, subreddit, title, num_comments, score, gilded, created_utc, self_text) values (%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING
+   """
+
+   insert_comment = """
+   insert into comments (id, subreddit, body, score, gilded, created_utc, link_id) values (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING
+   """
    for i in data:
-      id = i[0]
-
       if _type == 'comments':
-         dt_utc = i[6].replace(tzinfo=datetime.timezone.utc)
-         unixtime = int(calendar.timegm(dt_utc.utctimetuple())) 
-         meta = json.dumps(
-            {
-               'create': {
-                  '_index':'redarc_comments',
-                  "_id": id,
-               },
-            }
-         )
-         data = json.dumps(
-            {
-               'body': i[2],
-               'score': i[8],
-               'created_utc': unixtime,
-               'type': "comment",
-               'subreddit': i[1],
-               'link_id': i[8]
-            }
-         )
+         cursor.execute(insert_comment, i[:-1])
       else:
-         dt_utc = i[10].replace(tzinfo=datetime.timezone.utc)
-         unixtime = int(calendar.timegm(dt_utc.utctimetuple())) 
-         meta = json.dumps(
-            {
-               'create': {
-                  '_index':'redarc',
-                  "_id": id,
-               },
-            }
-         )
-         data = json.dumps(
-            {
-               'title': i[2],
-               'self_text': i[11],
-               'score': i[8],
-               'created_utc': unixtime,
-               'type': "submission",
-               'subreddit': i[1]
-            }
-         )
-      actions.append(meta)
-      actions.append(data)
-
-   return es_client.bulk(operations=actions, index='redarc_tmp')
+         cursor.execute(insert_submission, i[:-1])
+   pgfts_con.commit()
+   pg_pool_fts.putconn(pgfts_con)
 
 # find n ids starting with lowest retrieved_utc and index_utc == None
 def find_ids():
+   # fetch search index progress for submissions/comments
+   # fetch 10k submissions/comments sort by retrieved_utc and create_utc 
+   # where retrieved_utc >= progress_retrieved_utc and created_utc >= progress_created_utc
+   # Note: edge case where content previously indexed in same date range is indexed again
 
-   cursor.execute('''select id from status_submissions where retrieved_utc is not NULL
-      and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000''')
-   ids = sum(tuple(cursor.fetchall()), ())
-   if len(ids) > 0:
-      cursor.execute('select * from submissions where id in %s', (ids,))
-      subs = cursor.fetchall()
-      res = bulk_insert('submissions', subs)
-      update_indexed_status("subsmissions", res)
+   cursor.execute('''select * from search_status_submissions''')
+   sss = cursor.fetchone()
+   if sss == None:
+      sss = (0, 0)
+   cursor.execute('''select id, subreddit, title, num_comments, score, gilded, created_utc, self_text, retrieved_utc from submissions where retrieved_utc >= %s
+      and created_utc >= %s ORDER BY retrieved_utc ASC, created_utc ASC LIMIT 10000''', (sss[1], sss[0]))
+   subs = cursor.fetchall()
+   subs_indexed = len(subs)
+   if len(subs) > 0:
+      insert_search('submissions', subs)
+      update_search_indexed_status('submissions', subs[-1])
+   print("FINISHED PROCESSING SUBMISSIONS")
+   cursor.execute('''select * from search_status_comments''')
+   ssc = cursor.fetchone()
+   if ssc == None:
+      ssc = (0, 0)
+   cursor.execute('''select id, subreddit, body, score, gilded, created_utc, link_id, retrieved_utc from comments where retrieved_utc >= %s
+      and created_utc >= %s ORDER BY retrieved_utc, created_utc ASC LIMIT 10000''', (ssc[1], ssc[0]))
+   coms = cursor.fetchall()
+   coms_indexed = len(coms)
+   if len(coms) > 0:
+      insert_search('comments', coms)
+      update_search_indexed_status('comments', coms[-1])
+   print("FINISHED PROCESSING COMMENTS")
+   pg_con.commit()
+   # pg_pool.putconn(pg_con)
+   return (subs_indexed, coms_indexed)
 
-      cursor.execute('''select id from status_comments where retrieved_utc is not NULL
-         and indexed_utc is NULL ORDER BY retrieved_utc ASC LIMIT 10000''')
-      ids = sum(tuple(cursor.fetchall()), ())
-      cursor.execute('select * from comments where id in %s', (ids,))
-      coms = cursor.fetchall()
-      res = bulk_insert('comments', coms)
-      update_indexed_status("comments", res)
-      pg_con.commit()
-      pg_pool.putconn(pg_con)
-
-def update_indexed_status(_type, res):
-   _type = "status_comments" if _type == "comments" else "status_submissions"
-   _time = int(time.time())
-   sql = """
-   update status_submissions
+def update_search_indexed_status(_type, last_indexed):
+   # Update status with most recently indexed posts
+   table_type = "search_status_comments" if _type == "comments" else "search_status_submissions"
+   update_sql = """
+   update %s
    set
-      indexed_utc = t.time
-   from (values %s) as t(id, time)
-   where status_submissions.id = t.id;
+      created_utc = %s, retrieved_utc = %s;
    """
-   rows_to_update = []
-   for i in res['items']:
-      if 'error' in i['create']:
-         logging.error('Failed to index ' + str(i['create']['_id']))
-         logging.error(i['create']['error'])
-      else:
-         logging.info('Indexed ' + str(i['create']['_id']))
-         logging.info(i['create']['status'])
-         rows_to_update.append((i['create']['_id'], _time))
-   print(rows_to_update)
-   execute_values(cursor, sql, rows_to_update)
+   insert_sql = """
+   insert into %s (created_utc, retrieved_utc) values (%s, %s)
+   """
+
+   drop_sql = "delete from %s"
+
+   if _type == 'comments':
+      created_utc = last_indexed[5]
+      retrieved_utc = last_indexed[-1]
+   else:
+      created_utc = last_indexed[6]
+      retrieved_utc = last_indexed[-1]
+
+   cursor.execute(update_sql, (AsIs(table_type), created_utc, retrieved_utc))
+   if cursor.rowcount != 1:
+      cursor.execute(drop_sql, (AsIs(table_type),))
+      cursor.execute(insert_sql, (AsIs(table_type), created_utc, retrieved_utc)) #created_utc and retrieved_utc
 
 def index_db():
+   # Update subreddits table with num posts, threads and new subreddits
    try:
       cursor.execute("select DISTINCT subreddit from submissions;")
       subreddits = cursor.fetchall()
@@ -130,17 +110,19 @@ def index_db():
             VALUES (%s, %s, %s, %s) ON CONFLICT (name) DO UPDATE SET(num_submissions, num_comments) = (%s, %s)""",
             (row, False, num_submissions, num_comments, num_submissions, num_comments))
       pg_con.commit()
-      pg_con.close()
+      # pg_con.close()
    except Exception as error:
       logging.error(error)
+
 if __name__ == "__main__":
    time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
    if not os.path.exists('logs'):
       os.makedirs('logs')
    logging.basicConfig(filename='logs/index_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
+   index_db()
    while True:
-      if os.getenv('ES_ENABLED').lower() == 'true':
-         find_ids()
-      index_db()
-      time.sleep(int(os.getenv('INDEX_DELAY')))
+      res = find_ids()
+      if (res[0] < 10000 and res[1] < 10000):
+         index_db()
+         time.sleep(int(os.getenv('INDEX_DELAY')))
 

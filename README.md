@@ -38,6 +38,8 @@ magnet:?xt=urn:btih:c398a571976c78d346c325bd75c47b82edf6124e&tr=https%3A%2F%2Fac
 ```
 # Installation:
 
+Master branch is unstable. Please checkout a release
+
 ## Docker 
 
 Install Docker: https://docs.docker.com/engine/install

@@ -64,6 +64,8 @@ Modify envars as needed
 ```
 $ git clone https://github.com/Yakabuff/redarc.git
 $ cd redarc
+$ git fetch --all --tags
+$ git checkout tags/v0.2.0 -b v0.2.0
 // Modify docker-compose.yml as-needed
 $ docker compose up -d
 ```
@@ -77,6 +79,8 @@ Use `http://es01:9200` for `ES_HOST` if container is in the same docker network.
 ```
 $ git clone https://github.com/Yakabuff/redarc.git
 $ cd redarc
+$ git fetch --all --tags
+$ git checkout tags/v0.2.0 -b v0.2.0
 // Modify docker-compose-es.yml as-needed
 $ docker compose -f docker-compose-es.yml up -d
 ```

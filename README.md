@@ -60,7 +60,7 @@ Setting an `INGEST_PASSWORD` in redarc_ingest is highly recommended to prevent a
 
 ## Docker compose (Recommended):
 
-Docker compose **without** elasticsearch:
+Docker compose:
 
 Modify envars as needed
 ```
@@ -70,21 +70,6 @@ $ git fetch --all --tags
 $ git checkout tags/v0.2.0 -b v0.2.0
 // Modify docker-compose.yml as-needed
 $ docker compose up -d
-```
-
-Docker compose **with** elasticsearch:
-
-Modify envars as needed.
-
-Use `http://es01:9200` for `ES_HOST` if container is in the same docker network.
-
-```
-$ git clone https://github.com/Yakabuff/redarc.git
-$ cd redarc
-$ git fetch --all --tags
-$ git checkout tags/v0.2.0 -b v0.2.0
-// Modify docker-compose-es.yml as-needed
-$ docker compose -f docker-compose-es.yml up -d
 ```
 
 ## Manual installation:
@@ -115,6 +100,8 @@ psql -h localhost -U postgres -a -f scripts/db_status_comments.sql
 psql -h localhost -U postgres -a -f scripts/db_status_comments_index.sql
 psql -h localhost -U postgres -a -f scripts/db_status_submissions.sql
 psql -h localhost -U postgres -a -f scripts/db_status_submissions_index.sql
+psql -h localhost -U postgres -a -f scripts/db_fts.sql
+psql -h localhost -U postgres -a -f scripts/db_progress.sql
 ```
 
 ### 2) Process dump and insert rows into postgres database with the load_sub/load_comments scripts
@@ -185,7 +172,6 @@ $ pip install gunicorn
 $ pip install falcon
 $ pip install rq
 $ pip install python-dotenv
-$ pip install elasticsearch
 $ pip install praw
 $ pip install psycopg2-binary
 $ gunicorn --reload redarc_ingest.app &
@@ -211,19 +197,16 @@ $ pip install pyscopg2-binary
 
 $ python3 scripts/load_sub.py <path_to_submission_file>
 
+$ python3 scripts/load_sub_fts.py <path_to_submission_file>
+
 $ python3 scripts/load_comments.py <path_to_comment_file>
+
+$ python3 scripts/load_comments_fts.py <path_to_comment_file>
 
 $ python3 scripts/index.py [subreddit_name]
 
 # Optional
 python3 scripts/unlist.py <subreddit> <true|false>
-```
-
-## Elasticsearch:
-
-Ingest an entire JSON dump:
-```
-$ scripts/es_batch.sh <batch_name> <path_submission_dump> <path_comment_dump> <elasticsearch password>
 ```
 
 ## Web:

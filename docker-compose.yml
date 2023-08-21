@@ -18,6 +18,22 @@ services:
       timeout: 10s
       retries: 10
 
+  postgres_fts:
+    image: postgres
+    container_name: pgsql-fts
+    networks:
+      - redarc
+    environment:
+      POSTGRES_PASSWORD: test1234
+    volumes:
+      - pgftsredarc01:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h",  "pgsql-fts", "-U", "postgres", "-p", "5433"]
+      timeout: 10s
+      retries: 10
+
   redarc:
     build:
       context: .
@@ -54,7 +70,6 @@ services:
       PG_PASSWORD: test1234
       PG_HOST: pgsql-dev
       PG_PORT: 5432
-      ES_ENABLED: false
       # Reddit credentials
       CLIENT_ID: change me
       CLIENT_SECRET: change me
@@ -76,6 +91,8 @@ networks:
 
 volumes:
   pgredarc01:
+    driver: local
+  pgftsredarc01:
     driver: local
   redarc_ingest_logs:
     driver: local

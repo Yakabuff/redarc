@@ -1,7 +1,6 @@
 import datetime
 import logging
 from worker.validate import validate_submission, validate_comment
-from worker.con import pg_pool
 import time
 from enum import Enum
 import time
@@ -9,6 +8,11 @@ from rq import Worker
 from rq import get_current_job
 from redarc_ingest.conn import redis_conn
 import os
+from psycopg2 import pool
+import psycopg2
+from dotenv import load_dotenv
+load_dotenv()
+
 """
 Redarc worker
 
@@ -111,6 +115,13 @@ if __name__ == "__main__":
         user_agent=os.getenv('USER_AGENT'),
         username=os.getenv('REDDIT_USERNAME'),
     )
+
+    pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
+                                                            password=os.getenv('PG_PASSWORD'),
+                                                            host=os.getenv('PG_HOST'),
+                                                            port=os.getenv('PG_PORT'),
+                                                            database=os.getenv('PG_DATABASE'))
+    
     time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
     if not os.path.exists('logs'):
         os.makedirs('logs')

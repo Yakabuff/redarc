@@ -116,11 +116,13 @@ python3 scripts/unlist.py <subreddit> <true|false>
 ### 3) Start the API server.
 
 ```
+cd api
 npm i
 node server.js
 ```
 OR
 ```
+cd api
 npm install pm2
 pm2 start server.js
 ```
@@ -128,7 +130,7 @@ pm2 start server.js
 ### 4) Start the frontend
 
 ```
-cd redarc-frontend
+cd ../redarc-frontend
 mv sample.env .env
 ```
 Set address for API server in the .env file
@@ -147,7 +149,7 @@ npm run dev // Dev server
 
 Edit nginx/nginx_original.conf with your own values
 ```
-$ cd redarc
+$ cd ..
 $ mv nginx/redarc_original.conf /etc/nginx/conf.d/redarc.conf
 ```
 

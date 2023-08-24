@@ -1,1 +1,0 @@
-CREATE INDEX IF NOT EXISTS status_comments_idx on status_comments(id);

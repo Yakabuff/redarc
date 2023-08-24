@@ -1,5 +1,4 @@
 #!/bin/bash
-cd /redarc
 
 # Database setup
 psql -h pgsql-dev -U postgres -a -f scripts/db_submissions.sql
@@ -14,6 +13,7 @@ psql -h pgsql-dev -U postgres -a -f scripts/db_status_submissions_index.sql
 psql -h pgsql-dev -U postgres -a -f scripts/db_progress.sql
 
 # Update postgres password
+cd /redarc/api
 python3 scripts/express_config.py
 # Start API
 node server.js &

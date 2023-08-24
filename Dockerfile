@@ -8,7 +8,8 @@ RUN mkdir -p /redarc
 WORKDIR /redarc
 COPY . .
 
-RUN mv config_default.json config.json
+RUN mv /redarc/api/config_default.json /redarc/api/config.json
+WORKDIR /redarc/api
 RUN npm ci
 
 WORKDIR /redarc/redarc-frontend

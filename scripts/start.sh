@@ -19,7 +19,7 @@ python3 scripts/express_config.py
 node server.js &
 
 # Build react frontend
-cd /redarc/redarc-frontend
+cd /redarc/frontend
 echo "VITE_API_DOMAIN=$REDARC_API
 VITE_SUBMIT_DOMAIN=$REDARC_SUBMIT" > .env
 npm run build

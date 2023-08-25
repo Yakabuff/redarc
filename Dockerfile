@@ -12,7 +12,7 @@ RUN mv /redarc/api/config_default.json /redarc/api/config.json
 WORKDIR /redarc/api
 RUN npm ci
 
-WORKDIR /redarc/redarc-frontend
+WORKDIR /redarc/frontend
 RUN npm ci
 
 WORKDIR /redarc

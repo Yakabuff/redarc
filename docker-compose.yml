@@ -57,7 +57,7 @@ services:
 
   redarc_ingest:
     build:
-      context: ./redarc_ingest
+      context: ./ingest
       dockerfile: Dockerfile
     image: redarc_ingest
     container_name: redarc_ingest

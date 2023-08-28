@@ -1,13 +1,15 @@
 import json
 import re
-from .conn import url_queue
+# from .conn import url_queue
 import falcon
-from worker.reddit_worker import fetch_thread
+# from worker.reddit_worker import fetch_thread
 import os
 
 class Submit:
+   def __init__(self, url_queue):
+      self.url_queue = url_queue
 
-    def on_post(self, req, resp):
+   def on_post(self, req, resp):
 
       if os.getenv('INGEST_ENABLED') == 'false':
         resp.text = json.dumps({"status": "ingest disabled", "url": url}, ensure_ascii=False)
@@ -47,7 +49,7 @@ class Submit:
         resp.status = falcon.HTTP_500
         return
          
-      job = url_queue.enqueue(fetch_thread, id, url)
+      job = self.url_queue.enqueue('worker.reddit_worker.fetch_thread', id, url)
       if job.get_status(refresh=True) == "queued":
         resp.text = json.dumps({"status": "success", "id": job.id, "position": job.get_position()}, ensure_ascii=False)
         resp.status = falcon.HTTP_200

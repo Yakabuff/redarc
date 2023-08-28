@@ -2,15 +2,17 @@ FROM node:16-alpine3.17
 
 RUN apk update
 # Download the runtime dependencies
-RUN apk add --no-cache bash nginx python3 postgresql-client
+RUN apk add --no-cache bash nginx python3 py3-pip postgresql-client
 
 RUN mkdir -p /redarc
 WORKDIR /redarc
 COPY . .
 
-RUN mv /redarc/api/config_default.json /redarc/api/config.json
-WORKDIR /redarc/api
-RUN npm ci
+RUN pip install gunicorn
+RUN pip install falcon
+RUN pip install rq
+RUN pip install python-dotenv
+RUN pip install psycopg2-binary
 
 WORKDIR /redarc/frontend
 RUN npm ci

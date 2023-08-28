@@ -45,14 +45,26 @@ services:
     environment:
       # Replace redarc.mysite.org with your hostname
       REDARC_API: http://redarc.mysite.org/api/
-      REDARC_SUBMIT: http://redarc.mysite.org/submit/
       SERVER_NAME: redarc.mysite.org
-      PGPASSWORD: test1234
+      PG_DATABASE: postgres
+      PG_USER: postgres
+      PG_PASSWORD: test1234
+      PG_HOST: pgsql-dev
+      PG_PORT: 5432
+      PGFTS_DATABASE: postgres
+      PGFTS_USER: postgres
+      PGFTS_PASSWORD: test1234
+      PGFTS_HOST: pgsql-fts
+      PGFTS_PORT: 5432
       ADMIN_PASSWORD: "qwerty"
+      INGEST_ENABLED: false
+      INGEST_PASSWORD: "asdf"
     ports:
       - "80:80"
     depends_on:
       postgres:
+        condition: service_healthy
+      postgres_fts:
         condition: service_healthy
 
   redarc_ingest:
@@ -82,6 +94,8 @@ services:
       - redarc_ingest_logs:/ingest/logs
     depends_on:
       postgres:
+        condition: service_healthy
+      postgres_fts:
         condition: service_healthy
 
 networks:

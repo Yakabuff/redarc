@@ -8,8 +8,6 @@ RUN mkdir -p /ingest
 WORKDIR /ingest
 COPY . .
 
-RUN pip install gunicorn
-RUN pip install falcon
 RUN pip install rq
 RUN pip install python-dotenv
 RUN pip install praw

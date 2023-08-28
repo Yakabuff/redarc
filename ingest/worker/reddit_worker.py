@@ -19,7 +19,20 @@ Redarc worker
 1) Make reddit request
 2) Insert into DB if comment/submission ID does not exist.  If exist, update gilded, upvotes if number higher.  Update score
 """
+import praw
+reddit = praw.Reddit(
+    client_id=os.getenv('CLIENT_ID'),
+    client_secret=os.getenv('CLIENT_SECRET'),
+    password=os.getenv('PASSWORD'),
+    user_agent=os.getenv('USER_AGENT'),
+    username=os.getenv('REDDIT_USERNAME'),
+)
 
+pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
+                                                        password=os.getenv('PG_PASSWORD'),
+                                                        host=os.getenv('PG_HOST'),
+                                                        port=os.getenv('PG_PORT'),
+                                                        database=os.getenv('PG_DATABASE'))
 class type(Enum):
     SUBMISSION = 1
     COMMENT = 2
@@ -107,20 +120,6 @@ def insert_db(_type, data):
         logging.error(error)
 
 if __name__ == "__main__":
-    import praw
-    reddit = praw.Reddit(
-        client_id=os.getenv('CLIENT_ID'),
-        client_secret=os.getenv('CLIENT_SECRET'),
-        password=os.getenv('PASSWORD'),
-        user_agent=os.getenv('USER_AGENT'),
-        username=os.getenv('REDDIT_USERNAME'),
-    )
-
-    pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
-                                                            password=os.getenv('PG_PASSWORD'),
-                                                            host=os.getenv('PG_HOST'),
-                                                            port=os.getenv('PG_PORT'),
-                                                            database=os.getenv('PG_DATABASE'))
     
     time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
     if not os.path.exists('logs'):

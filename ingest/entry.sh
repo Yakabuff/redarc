@@ -26,9 +26,6 @@ cd /ingest
 
 redis-server &
 
-# Start gunicorn
-gunicorn -b 0.0.0.0:8000 --reload redarc_ingest.app &
-
 if [ "$INGEST_ENABLED" = "true" ] ; then
    echo "ingest enabled"
    # Start reddit worker

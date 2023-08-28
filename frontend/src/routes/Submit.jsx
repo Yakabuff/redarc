@@ -19,7 +19,7 @@ export default function Submit(){
          return;
       }
 
-      fetch(import.meta.env.VITE_SUBMIT_DOMAIN + request, {
+      fetch(import.meta.env.VITE_API_DOMAIN + request, {
          headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json; charset=UTF-8',

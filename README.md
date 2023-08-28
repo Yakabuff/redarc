@@ -137,7 +137,6 @@ Set address for API server in the .env file
 
 ```
 VITE_API_DOMAIN=http://my-api-server.com/api/
-VITE_SUBMIT_DOMAIN=http://my-submit-server.com/ingest/
 ```
 
 ```

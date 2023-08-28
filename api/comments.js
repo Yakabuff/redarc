@@ -109,19 +109,19 @@ function unflatten(data, root) {
    let lookup = arrayToLookup(data);
 	let commentTree = [];
 	Object.keys(lookup).forEach(commentID => {
-   let comment = lookup[commentID];
-	let parentID = comment.parent_id;
-		
-	if (parentID == root) {
-		commentTree.push(comment);
-	} else {
-		if (lookup[parentID] == undefined) {
-			commentTree.push({body: "[comment not found]", author: "[unknown]", id: commentID, replies: [comment], parent_id: root, link_id: root})
+		let comment = lookup[commentID];
+		let parentID = comment.parent_id;
+			
+		if (parentID == root) {
+			commentTree.push(comment);
 		} else {
-			lookup[parentID].replies.push(comment);
+			if (lookup[parentID] == undefined) {
+				commentTree.push({body: "[comment not found]", author: "[unknown]", id: commentID, replies: [comment], parent_id: root, link_id: root})
+			} else {
+				lookup[parentID].replies.push(comment);
+			}
 		}
-	}
-});
+	});
 
 	return commentTree;
 }

@@ -1,24 +1,13 @@
 # redarc
 A self-hosted solution to search, view and create your own Reddit archives.
 
+## Features:
 - Ingest pushshift dumps
 - View threads/comments
 - Elasticsearch support
 - Submit threads to be archived via API (Completely untested.  Developed with mock data and the [PRAW](https://praw.readthedocs.io/en/stable/) documentation)
 
 Please abide by the Reddit Terms of Service and [User Agreement](https://www.redditinc.com/policies/user-agreement-april-18-2023) if you are using their API
-
-TL;DR you are not allowed to distribute or host Reddit comments and threads
-<details>
-
-```
-Except and solely to the extent such a restriction is impermissible under applicable law, you may not, without our written agreement:
-
-license, sell, transfer, assign, distribute, host, or otherwise commercially exploit the Services or Content;
-modify, prepare derivative works of, disassemble, decompile, or reverse engineer any part of the Services or Content; or
-access the Services or Content in order to build a similar or competitive website, product, or service, except as permitted under any Additional Terms (as defined below).
-```
-</details>
 
 ![Alt text](docs/screenshot.png "screenshot")
 ![Alt text](docs/screenshot2.png "screenshot2")
@@ -91,6 +80,15 @@ $ docker run \
 ```
 
 ```
+$ docker run \
+  --name pgsql-fts \
+  -e POSTGRES_PASSWORD=test1234 \
+  -d \
+  -v ${PWD}/postgres-docker:/var/lib/postgresql/data \
+  -p 5433:5432 postgres 
+```
+
+```
 psql -h localhost -U postgres -a -f scripts/db_submissions.sql
 psql -h localhost -U postgres -a -f scripts/db_comments.sql
 psql -h localhost -U postgres -a -f scripts/db_subreddits.sql
@@ -100,7 +98,7 @@ psql -h localhost -U postgres -a -f scripts/db_status_comments.sql
 psql -h localhost -U postgres -a -f scripts/db_status_comments_index.sql
 psql -h localhost -U postgres -a -f scripts/db_status_submissions.sql
 psql -h localhost -U postgres -a -f scripts/db_status_submissions_index.sql
-psql -h localhost -U postgres -a -f scripts/db_fts.sql
+psql -h localhost -U postgres -p 5433 -a -f scripts/db_fts.sql
 psql -h localhost -U postgres -a -f scripts/db_progress.sql
 ```
 
@@ -109,6 +107,8 @@ psql -h localhost -U postgres -a -f scripts/db_progress.sql
 ```
 python3 scripts/load_sub.py <path_to_submission_file>
 python3 scripts/load_comments.py <path_to_comment_file>
+python3 scripts/load_sub_fts.py <path_to_submission_file>
+python3 scripts/load_comments_fts.py <path_to_comment_file>
 python3 scripts/index.py [subreddit_name]
 python3 scripts/unlist.py <subreddit> <true|false>
 ```
@@ -116,15 +116,15 @@ python3 scripts/unlist.py <subreddit> <true|false>
 ### 3) Start the API server.
 
 ```
-cd api
-npm i
-node server.js
-```
-OR
-```
-cd api
-npm install pm2
-pm2 start server.js
+$ cd api
+$ python -m venv venv
+$ source venv/bin/activate
+$ pip install gunicorn
+$ pip install falcon
+$ pip install rq
+$ pip install python-dotenv
+$ pip install psycopg2-binary
+$ gunicorn app
 ```
 
 ### 4) Start the frontend
@@ -170,13 +170,10 @@ Setting an `INGEST_PASSWORD` is highly recommended in order to prevent abuse.
 $ cd redarc/redarc_ingest
 $ python -m venv venv
 $ source venv/bin/activate
-$ pip install gunicorn
-$ pip install falcon
 $ pip install rq
 $ pip install python-dotenv
 $ pip install praw
 $ pip install psycopg2-binary
-$ gunicorn --reload redarc_ingest.app &
 $ python3 -m worker.reddit_worker &
 $ python3 -m worker.index_worker &
 ```

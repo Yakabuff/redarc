@@ -6,7 +6,6 @@ from enum import Enum
 import time
 from rq import Worker
 from rq import get_current_job
-from redarc_ingest.conn import redis_conn
 import os
 from psycopg2 import pool
 import psycopg2
@@ -27,6 +26,10 @@ reddit = praw.Reddit(
     user_agent=os.getenv('USER_AGENT'),
     username=os.getenv('REDDIT_USERNAME'),
 )
+
+from redis import Redis
+
+redis_conn = Redis(host='localhost', port=6379)
 
 pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
                                                         password=os.getenv('PG_PASSWORD'),

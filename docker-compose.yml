@@ -59,6 +59,7 @@ services:
       ADMIN_PASSWORD: "qwerty"
       INGEST_ENABLED: false
       INGEST_PASSWORD: "asdf"
+      REDIS_HOST: "redarc_ingest"
     ports:
       - "80:80"
     depends_on:
@@ -82,6 +83,11 @@ services:
       PG_PASSWORD: test1234
       PG_HOST: pgsql-dev
       PG_PORT: 5432
+      PGFTS_DATABASE: postgres
+      PGFTS_USER: postgres
+      PGFTS_PASSWORD: test1234
+      PGFTS_HOST: pgsql-fts
+      PGFTS_PORT: 5432
       # Reddit credentials
       CLIENT_ID: change me
       CLIENT_SECRET: change me

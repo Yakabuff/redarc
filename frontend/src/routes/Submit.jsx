@@ -1,9 +1,7 @@
 import React, { useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
 
 export default function Submit(){
    const [errorMessage, setErrorMessage] = React.useState("");
-   const navigate = useNavigate();
    const handleSubmit = event => {
       event.preventDefault();
       let request = '/submit';

@@ -27,7 +27,7 @@ pgfts_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PGFTS_USE
                                                       port=os.getenv('PGFTS_PORT'),
                                                       database=os.getenv('PGFTS_DATABASE'))
 
-redis_conn = Redis(host='localhost', port=6379)
+redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=6379)
 url_queue = Queue("url_submit", connection=redis_conn)
 
 comments = Comments(pg_pool)

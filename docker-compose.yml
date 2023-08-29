@@ -30,7 +30,7 @@ services:
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-h",  "pgsql-fts", "-U", "postgres", "-p", "5433"]
+      test: ["CMD", "pg_isready", "-h",  "pgsql-fts", "-U", "postgres"]
       timeout: 10s
       retries: 10
 

@@ -58,6 +58,7 @@ services:
       PGFTS_PORT: 5432
       ADMIN_PASSWORD: "qwerty"
       INGEST_ENABLED: false
+      INDEX_ENABLED: false
       INGEST_PASSWORD: "asdf"
       REDIS_HOST: "redarc_ingest"
     ports:

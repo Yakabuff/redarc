@@ -1,6 +1,8 @@
 import json
 import falcon
 from psycopg2.extras import RealDictCursor
+import logging
+logger = logging.getLogger('redarc')
 
 class Submissions:
    def __init__(self, pool):
@@ -52,6 +54,7 @@ class Submissions:
          cursor.execute(text, params)
          submissions = cursor.fetchall()
       except Exception as error:
+         logger.error(error)
          resp.status = falcon.HTTP_500
          return
       

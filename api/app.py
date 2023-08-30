@@ -1,3 +1,6 @@
+import redarc_logger
+logger = redarc_logger.init_logger('redarc')
+logger.info('Starting redarc...')
 import falcon
 import os
 from psycopg2 import pool

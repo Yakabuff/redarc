@@ -28,6 +28,8 @@ export default function Submit(){
       .then (resp => {
          if (resp['status'] === 401) {
             throw new Error("Invalid password")
+         } else if (resp['status'] === 501) {
+            throw new Error("Ingest disabled")
          } else {
             return resp.json()
          }

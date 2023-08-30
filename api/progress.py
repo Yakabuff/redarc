@@ -2,6 +2,8 @@ import json
 import falcon
 import os
 from psycopg2.extras import RealDictCursor
+import logging
+logger = logging.getLogger('redarc')
 
 class Progress:
    def __init__(self, pool):
@@ -19,7 +21,7 @@ class Progress:
          cursor.execute('SELECT * FROM progress ORDER BY start_utc DESC LIMIT 200')
          progress = cursor.fetchall()
       except Exception as error:
-         print(error)
+         logger.error(error)
          resp.status = falcon.HTTP_500
          return
       

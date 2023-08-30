@@ -1,6 +1,8 @@
 import json
 import falcon
 from psycopg2.extras import RealDictCursor
+import logging
+logger = logging.getLogger('redarc')
 
 COMMENT = "comment"
 SUBMISSION = "submission"
@@ -65,6 +67,7 @@ class Search:
          cursor.execute(text, values)
          results = cursor.fetchall()
       except Exception as error:
+         logger.error(error)
          resp.status = falcon.HTTP_500
          return
       resp.text= json.dumps(list(results))

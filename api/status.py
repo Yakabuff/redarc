@@ -1,6 +1,8 @@
 import json
 import falcon
 from psycopg2.extras import RealDictCursor
+import logging
+logger = logging.getLogger('redarc')
 
 class Status:
    def __init__(self, pool):
@@ -13,6 +15,7 @@ class Status:
          cursor.execute('SELECT job_id, start_utc, finish_utc, error FROM progress WHERE job_id = %s', [req.get_param('job_id')])
          status = cursor.fetchone()
       except Exception as error:
+         logger.error(error)
          resp.status = falcon.HTTP_500
          return
       resp.text= json.dumps([status])

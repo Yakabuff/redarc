@@ -1,6 +1,8 @@
 import json
 import falcon
 from psycopg2.extras import RealDictCursor
+import logging
+logger = logging.getLogger('redarc')
 
 class Subreddits:
    def __init__(self, pool):
@@ -13,6 +15,7 @@ class Subreddits:
          cursor.execute('select * from subreddits')
          subs = cursor.fetchall()
       except Exception as error:
+         logger.error(error)
          resp.status = falcon.HTTP_500
          return
       

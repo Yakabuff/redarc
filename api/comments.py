@@ -1,7 +1,8 @@
 import json
 import falcon
 from psycopg2.extras import RealDictCursor
-
+import logging
+logger = logging.getLogger('redarc')
 class Comments:
    def __init__(self, pool):
       self.pool = pool
@@ -67,6 +68,7 @@ class Comments:
          cursor.execute(text, params)
          comments = cursor.fetchall()
       except Exception as error:
+         logger.error(error)
          resp.status = falcon.HTTP_500
          return
       if req.get_param_as_bool('unflatten') == True and req.get_param('link_id'):

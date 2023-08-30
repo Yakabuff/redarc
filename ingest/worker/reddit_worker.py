@@ -1,7 +1,10 @@
 import datetime
+import sys
+from redis import Redis
 import logging
 from worker.validate import validate_submission, validate_comment
 import time
+import praw
 from enum import Enum
 import time
 from rq import Worker
@@ -18,24 +21,32 @@ Redarc worker
 1) Make reddit request
 2) Insert into DB if comment/submission ID does not exist.  If exist, update gilded, upvotes if number higher.  Update score
 """
-import praw
-reddit = praw.Reddit(
-    client_id=os.getenv('CLIENT_ID'),
-    client_secret=os.getenv('CLIENT_SECRET'),
-    password=os.getenv('PASSWORD'),
-    user_agent=os.getenv('USER_AGENT'),
-    username=os.getenv('REDDIT_USERNAME'),
-)
 
-from redis import Redis
+time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+logging.basicConfig(filename='logs/reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
 
-redis_conn = Redis(host='localhost', port=6379)
+try:
+    reddit = praw.Reddit(
+        client_id=os.getenv('CLIENT_ID'),
+        client_secret=os.getenv('CLIENT_SECRET'),
+        password=os.getenv('PASSWORD'),
+        user_agent=os.getenv('USER_AGENT'),
+        username=os.getenv('REDDIT_USERNAME'),
+    )
 
-pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
-                                                        password=os.getenv('PG_PASSWORD'),
-                                                        host=os.getenv('PG_HOST'),
-                                                        port=os.getenv('PG_PORT'),
-                                                        database=os.getenv('PG_DATABASE'))
+    redis_conn = Redis(host='localhost', port=6379)
+
+    pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
+                                                            password=os.getenv('PG_PASSWORD'),
+                                                            host=os.getenv('PG_HOST'),
+                                                            port=os.getenv('PG_PORT'),
+                                                            database=os.getenv('PG_DATABASE'))
+except Exception as error:
+    logging.error(error)
+    sys.exit(1)
+
 class type(Enum):
     SUBMISSION = 1
     COMMENT = 2
@@ -49,7 +60,7 @@ def progress_start(job_id, url):
         pg_con.commit()
         pg_pool.putconn(pg_con)
     except Exception as error:
-        logging.error(error)
+        raise Exception(error) from None
 
 def progress_finish(job_id, error):
     try:
@@ -60,14 +71,16 @@ def progress_finish(job_id, error):
         pg_con.commit()
         pg_pool.putconn(pg_con)
     except Exception as error:
-        logging.error(error)
+        raise Exception(error) from None
 
 def fetch_thread(thread_id, url):
     job = get_current_job()
-    logging.info('Current job: %s' % (job.id,))
-    progress_start(job.id, url)
-    logging.info("Fetching submission "+ str(thread_id))
+    if job == None:
+        raise Exception("Could not get current job") from None
     try:
+        logging.info('Current job: %s' % (job.id,))
+        progress_start(job.id, url)
+        logging.info("Fetching submission "+ str(thread_id))
         submission = reddit.submission(id=thread_id)
         process_submission(submission)
         comments = submission.comments
@@ -76,21 +89,33 @@ def fetch_thread(thread_id, url):
             process_comment(comment)
     except Exception as error:
         logging.error(error)
-        progress_finish(job.id, True)
+        try:
+            progress_finish(job.id, True)
+        except Exception as error:
+            raise Exception(error) from None
     else:
-        progress_finish(job.id, False)
+        try:
+            progress_finish(job.id, False)
+        except Exception as error:
+            raise Exception(error) from None
 
 def process_submission(submission):
     x = validate_submission(submission)
     logging.info("Processing submission: " + x['id'])
     if x != None:
-        insert_db(type.SUBMISSION, x)
+        try:
+            insert_db(type.SUBMISSION, x)
+        except Exception as error:
+            raise Exception(error) from None
 
 def process_comment(comment):
     x = validate_comment(comment)
     logging.info("Processing comments: " + x['id'])
     if x != None:
-        insert_db(type.COMMENT, x)
+        try:
+            insert_db(type.COMMENT, x)
+        except Exception as error:
+            raise Exception(error) from None
 
 def insert_db(_type, data):
     try:
@@ -120,14 +145,9 @@ def insert_db(_type, data):
         pg_pool.putconn(pg_con)
     except Exception as error:
         logging.error("Failed to insert: " + data['id'])
-        logging.error(error)
+        raise Exception(error) from None
 
 if __name__ == "__main__":
-    
-    time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
-    logging.basicConfig(filename='logs/reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
     try:
         w = Worker(['url_submit'], connection=redis_conn)
         w.work()

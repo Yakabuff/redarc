@@ -30,7 +30,10 @@ if [ "$INGEST_ENABLED" = "true" ] ; then
    echo "ingest enabled"
    # Start reddit worker
    python3 -m worker.reddit_worker &
+fi
 
+if [ "$INDEX_ENABLED" = "true" ] ; then
+   echo "index enabled"
    # Start index worker
    python3 -m worker.index_worker &
 fi

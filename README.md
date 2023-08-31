@@ -4,7 +4,7 @@ A self-hosted solution to search, view and create your own Reddit archives.
 ## Features:
 - Ingest pushshift dumps
 - View threads/comments
-- Elasticsearch support
+- Fulltext search via PostgresFTS
 - Submit threads to be archived via API (Completely untested.  Developed with mock data and the [PRAW](https://praw.readthedocs.io/en/stable/) documentation)
 
 Please abide by the Reddit Terms of Service and [User Agreement](https://www.redditinc.com/policies/user-agreement-april-18-2023) if you are using their API
@@ -104,6 +104,7 @@ psql -h localhost -U postgres -a -f scripts/db_progress.sql
 
 ### 2) Process dump and insert rows into postgres database with the load_sub/load_comments scripts
 
+Note: Be sure the ingest and Reddit workers are disabled
 ```
 python3 scripts/load_sub.py <path_to_submission_file>
 python3 scripts/load_comments.py <path_to_comment_file>
@@ -180,6 +181,8 @@ $ python3 -m worker.index_worker &
 # Ingest data:
 
 ## Postgres:
+
+Note: Be sure the ingest and Reddit workers are disabled
 
 Ensure `python3`, `pip` and `psycopg2-binary` are installed:
 ```

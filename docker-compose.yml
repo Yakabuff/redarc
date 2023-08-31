@@ -61,6 +61,8 @@ services:
       INDEX_ENABLED: false
       INGEST_PASSWORD: "asdf"
       REDIS_HOST: "redarc_ingest"
+    volumes:
+      - redarc_api_logs:/redarc/api/logs
     ports:
       - "80:80"
     depends_on:
@@ -116,4 +118,6 @@ volumes:
   pgftsredarc01:
     driver: local
   redarc_ingest_logs:
+    driver: local
+  redarc_api_logs:
     driver: local

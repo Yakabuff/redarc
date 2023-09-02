@@ -58,7 +58,6 @@ services:
       PGFTS_PORT: 5432
       ADMIN_PASSWORD: "qwerty"
       INGEST_ENABLED: false
-      INDEX_ENABLED: false
       INGEST_PASSWORD: "asdf"
       REDIS_HOST: "redarc_ingest"
     volumes:
@@ -81,6 +80,7 @@ services:
       - redarc
     environment:
       INGEST_ENABLED: true
+      INDEX_ENABLED: true
       PG_DATABASE: postgres
       PG_USER: postgres
       PG_PASSWORD: test1234
@@ -98,7 +98,6 @@ services:
       USER_AGENT: "my user agent"
       REDDIT_USERNAME: "change me"
       INDEX_DELAY: 300
-      INGEST_PASSWORD: asdf
     volumes:
       - redarc_ingest_logs:/ingest/logs
     depends_on:

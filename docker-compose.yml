@@ -98,6 +98,8 @@ services:
       USER_AGENT: "my user agent"
       REDDIT_USERNAME: "change me"
       INDEX_DELAY: 300
+      SUBREDDITS: "asdf,asdf"
+      FETCH_DELAY: 43200
     volumes:
       - redarc_ingest_logs:/ingest/logs
     depends_on:

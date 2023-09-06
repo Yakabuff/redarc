@@ -3,13 +3,16 @@ import re
 import falcon
 import os
 import logging
+import hashlib
+from rq.job import JobStatus
+
 logger = logging.getLogger('redarc')
 
 class Submit:
-   def __init__(self, url_queue):
+    def __init__(self, url_queue):
       self.url_queue = url_queue
 
-   def on_post(self, req, resp):
+    def on_post(self, req, resp):
 
       if os.getenv('INGEST_ENABLED') == 'false':
         resp.text = json.dumps({"status": "ingest disabled", "url": ""})
@@ -48,17 +51,35 @@ class Submit:
         resp.text = json.dumps({"status": "invalid url", "url": url}, ensure_ascii=False)
         resp.status = falcon.HTTP_500
         return
+      
+      id = hashlib.md5(id.encode('utf-8')).hexdigest() 
+      exists = self.job_exists(id)
+      if exists[0] == True:
+        resp.text = json.dumps({"status": "success", "id": id, "position": exists[1].get_position()}, ensure_ascii=False)
+        resp.status = falcon.HTTP_200
+        return
+
       try:
-        job = self.url_queue.enqueue('worker.reddit_worker.fetch_thread', id, url)
+        job = self.url_queue.enqueue('worker.reddit_worker.fetch_thread', id, url, job_id=id)
         if job.get_status(refresh=True) == "queued":
-          resp.text = json.dumps({"status": "success", "id": job.id, "position": job.get_position()}, ensure_ascii=False)
+          resp.text = json.dumps({"status": "success", "id": id, "position": job.get_position()}, ensure_ascii=False)
           resp.status = falcon.HTTP_200
         else:
           logger.error(f"Failed to enqueue job: thread ID {id}")
-          resp.text = json.dumps({"status": "failed", "id": job.id}, ensure_ascii=False)
+          resp.text = json.dumps({"status": "failed", "id": id}, ensure_ascii=False)
           resp.status = falcon.HTTP_500
       except Exception as error:
         logger.error(f"Failed to enqueue job: thread ID {id}")
         logger.error(error)
         resp.status = falcon.HTTP_500
         resp.text = json.dumps({"status": "failed"}, ensure_ascii=False)
+
+    def job_exists(self, id):
+      job = self.url_queue.fetch_job(id)  
+      if job == None:
+        return (False, None)   
+      status = job.get_status()
+      if status in {JobStatus.QUEUED, JobStatus.SCHEDULED}:
+        # Job exists and will be run.
+        return (True, job)
+      return (False, None)

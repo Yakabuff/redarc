@@ -36,7 +36,7 @@ export default function Submit(){
       })
       .then((data) => {
          if (data.status === 'success') {
-            throw new Error("Thread submitted! Check back in a bit. Job ID: "+  data.id)
+            throw new Error("Thread submitted! Check back in a bit. Job ID: "+  data.id + " Position in queue: " + data.position)
          } else {
             throw new Error("Failed to submit thread");
          }

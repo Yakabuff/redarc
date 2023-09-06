@@ -60,7 +60,7 @@ class Submit:
         return
 
       try:
-        job = self.url_queue.enqueue('worker.reddit_worker.fetch_thread', id, url, job_id=id)
+        job = self.url_queue.enqueue('worker.reddit_worker.fetch_thread', thread_id=id, url=url, job_id=id)
         if job.get_status(refresh=True) == "queued":
           resp.text = json.dumps({"status": "success", "id": id, "position": job.get_position()}, ensure_ascii=False)
           resp.status = falcon.HTTP_200

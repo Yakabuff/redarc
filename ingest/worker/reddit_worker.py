@@ -25,7 +25,7 @@ Redarc worker
 time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
 if not os.path.exists('logs'):
     os.makedirs('logs')
-logging.basicConfig(filename='logs/reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='logs/reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.INFO)
 
 try:
     reddit = praw.Reddit(

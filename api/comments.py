@@ -61,7 +61,7 @@ class Comments:
       if len(params) == 0:
          resp.status = falcon.HTTP_500
          return
-
+      
       try:
          pg_con = self.pool.getconn()
          cursor = pg_con.cursor(cursor_factory=RealDictCursor)
@@ -71,6 +71,9 @@ class Comments:
          logger.error(error)
          resp.status = falcon.HTTP_500
          return
+      finally:
+         self.pool.putconn(pg_con)
+
       if req.get_param_as_bool('unflatten') == True and req.get_param('link_id'):
          resp.text = json.dumps(unflatten(comments, req.get_param('link_id')))
          resp.content_type = falcon.MEDIA_JSON

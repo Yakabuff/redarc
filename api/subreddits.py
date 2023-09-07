@@ -18,7 +18,9 @@ class Subreddits:
          logger.error(error)
          resp.status = falcon.HTTP_500
          return
-      
+      finally:
+         self.pool.putconn(pg_con)
+
       s = filter(lambda x: (x['unlisted'] == False), subs)
       out = json.dumps(list(s))
       resp.text= out

@@ -1,3 +1,4 @@
+import sys
 import redarc_logger
 logger = redarc_logger.init_logger('redarc')
 logger.info('Starting redarc...')
@@ -18,20 +19,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = application = falcon.App(cors_enable=True)
-pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
-                                                      password=os.getenv('PG_PASSWORD'),
-                                                      host=os.getenv('PG_HOST'),
-                                                      port=os.getenv('PG_PORT'),
-                                                      database=os.getenv('PG_DATABASE'))
+try:
+   pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
+                                                         password=os.getenv('PG_PASSWORD'),
+                                                         host=os.getenv('PG_HOST'),
+                                                         port=os.getenv('PG_PORT'),
+                                                         database=os.getenv('PG_DATABASE'))
 
-pgfts_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PGFTS_USER'),
-                                                      password=os.getenv('PGFTS_PASSWORD'),
-                                                      host=os.getenv('PGFTS_HOST'),
-                                                      port=os.getenv('PGFTS_PORT'),
-                                                      database=os.getenv('PGFTS_DATABASE'))
+   pgfts_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PGFTS_USER'),
+                                                         password=os.getenv('PGFTS_PASSWORD'),
+                                                         host=os.getenv('PGFTS_HOST'),
+                                                         port=os.getenv('PGFTS_PORT'),
+                                                         database=os.getenv('PGFTS_DATABASE'))
 
-redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=6379)
-url_queue = Queue("url_submit", connection=redis_conn)
+   redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=6379)
+   url_queue = Queue("url_submit", connection=redis_conn)
+except Exception as error:
+   logger.error(error)
+   sys.exit(1)
 
 comments = Comments(pg_pool)
 subreddits = Subreddits(pg_pool)

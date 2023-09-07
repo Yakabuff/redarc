@@ -14,7 +14,7 @@ class Progress:
       if obj.get('password') != os.getenv('ADMIN_PASSWORD'):
          resp.status = falcon.HTTP_401
          return
-      
+
       try:
          pg_con = self.pool.getconn()
          cursor = pg_con.cursor(cursor_factory=RealDictCursor)
@@ -24,7 +24,9 @@ class Progress:
          logger.error(error)
          resp.status = falcon.HTTP_500
          return
-      
+      finally:
+         self.pool.putconn(pg_con)
+
       resp.text= json.dumps(list(progress))
       resp.content_type = falcon.MEDIA_JSON
       resp.status = falcon.HTTP_200

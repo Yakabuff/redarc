@@ -57,7 +57,9 @@ class Submissions:
          logger.error(error)
          resp.status = falcon.HTTP_500
          return
-      
+      finally:
+         self.pool.putconn(pg_con)
+
       resp.text= json.dumps(list(submissions))
       resp.content_type = falcon.MEDIA_JSON
       resp.status = falcon.HTTP_200

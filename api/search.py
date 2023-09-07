@@ -61,6 +61,7 @@ class Search:
       #    text += ' ORDER BY created_utc DESC'
       text += ' ORDER BY created_utc DESC'
       text += ' LIMIT 100'
+
       try:
          pg_con = self.pool.getconn()
          cursor = pg_con.cursor(cursor_factory=RealDictCursor)
@@ -70,6 +71,9 @@ class Search:
          logger.error(error)
          resp.status = falcon.HTTP_500
          return
+      finally:
+         self.pool.putconn(pg_con)
+
       resp.text= json.dumps(list(results))
       resp.content_type = falcon.MEDIA_JSON
       resp.status = falcon.HTTP_200

@@ -18,6 +18,9 @@ class Status:
          logger.error(error)
          resp.status = falcon.HTTP_500
          return
+      finally:
+         self.pool.putconn(pg_con)
+
       resp.text= json.dumps([status])
       resp.content_type = falcon.MEDIA_JSON
       resp.status = falcon.HTTP_200

@@ -51,20 +51,20 @@ def watch_subreddit(subreddit):
    for h in hot:
       id = hashlib.md5(h.id.encode('utf-8')).hexdigest() 
       if not id in ids:
-         ids[id] = (h.id, h.url)
+         ids[id] = (h.id, h.permalink)
 
    new = reddit.subreddit(subreddit).new(limit=25)
    for n in new:
       id = hashlib.md5(n.id.encode('utf-8')).hexdigest() 
       if not id in ids:
-         ids[id] = (n.id, n.url)
+         ids[id] = (n.id, n.permalink)
 
    rising = reddit.subreddit(subreddit).rising(limit=25)
    for r in rising:
       id = hashlib.md5(r.id.encode('utf-8')).hexdigest() 
       exists = job_exists(id)
       if not id in ids:
-         ids[id] = (r.id, r.url)
+         ids[id] = (r.id, r.permalink)
    return ids
 
 def work():

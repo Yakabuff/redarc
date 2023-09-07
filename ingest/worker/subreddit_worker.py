@@ -71,7 +71,6 @@ def work():
    subreddits=os.getenv('SUBREDDITS').split(",")
    for i in subreddits:
       id_set = watch_subreddit(i)
-      print(id_set)
       for i in id_set:
          id = id_set[i][0]
          url = id_set[i][1]

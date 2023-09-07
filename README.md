@@ -6,6 +6,7 @@ A self-hosted solution to search, view and create your own Reddit archives.
 - View threads/comments
 - Fulltext search via PostgresFTS
 - Submit threads to be archived via API (Completely untested.  Developed with mock data and the [PRAW](https://praw.readthedocs.io/en/stable/) documentation)
+- Periodically fetch rising, new and hot threads from specified subreddits
 
 Please abide by the Reddit Terms of Service and [User Agreement](https://www.redditinc.com/policies/user-agreement-april-18-2023) if you are using their API
 
@@ -176,6 +177,7 @@ $ pip install praw
 $ pip install psycopg2-binary
 $ python3 -m worker.reddit_worker &
 $ python3 -m worker.index_worker &
+$ python3 -m worker.subreddit_worker &
 ```
 
 # Ingest data:
@@ -212,7 +214,8 @@ python3 scripts/unlist.py <subreddit> <true|false>
 
 ## Web:
 
-- Submit Reddit URL using the web form `/submit`
+- Submit Reddit URL using the web form `/submit` to be fetched by `reddit_worker`
+- Add subreddits to the `SUBREDDITS` envar (delimited by commas) to be periodically fetched by `subreddit_worker`
 
 # API:
 

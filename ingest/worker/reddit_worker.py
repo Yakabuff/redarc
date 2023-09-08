@@ -1,5 +1,6 @@
 import datetime
 import sys
+import traceback
 from redis import Redis
 import logging
 from worker.validate import validate_submission, validate_comment
@@ -44,6 +45,7 @@ try:
                                                             port=os.getenv('PG_PORT'),
                                                             database=os.getenv('PG_DATABASE'))
 except Exception as error:
+    logging.error(traceback.format_exc())
     logging.error(error)
     sys.exit(1)
 
@@ -78,9 +80,9 @@ def fetch_thread(thread_id, url):
     if job == None:
         raise Exception("Could not get current job") from None
     try:
-        logging.info('Current job: %s' % (job.id,))
+        logging.debug('Current job: %s' % (job.id,))
         progress_start(job.id, url)
-        logging.info("Fetching submission "+ str(thread_id))
+        logging.info("Fetching submission ID: "+ str(thread_id) + " URL: " + str(url))
         submission = reddit.submission(id=thread_id)
         process_submission(submission)
         comments = submission.comments
@@ -89,6 +91,7 @@ def fetch_thread(thread_id, url):
             process_comment(comment)
     except Exception as error:
         logging.error(error)
+        logging.error(traceback.format_exc())
         try:
             progress_finish(job.id, True)
         except Exception as error:
@@ -101,7 +104,7 @@ def fetch_thread(thread_id, url):
 
 def process_submission(submission):
     x = validate_submission(submission)
-    logging.info("Processing submission: " + x['id'])
+    logging.debug("Processing submission: " + x['id'])
     if x != None:
         try:
             insert_db(type.SUBMISSION, x)
@@ -110,7 +113,7 @@ def process_submission(submission):
 
 def process_comment(comment):
     x = validate_comment(comment)
-    logging.info("Processing comments: " + x['id'])
+    logging.debug("Processing comments: " + x['id'])
     if x != None:
         try:
             insert_db(type.COMMENT, x)
@@ -149,7 +152,8 @@ def insert_db(_type, data):
 
 if __name__ == "__main__":
     try:
-        w = Worker(['url_submit'], connection=redis_conn)
-        w.work()
+        w = Worker(['url_submit'], connection=redis_conn, log_job_description=False)
+        w.work(logging_level=logging.WARNING)
     except Exception as error:
+        logging.error(traceback.format_exc())
         logging.error(error)

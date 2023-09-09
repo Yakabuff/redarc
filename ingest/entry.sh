@@ -29,6 +29,8 @@ if [ "$INGEST_ENABLED" = "true" ] ; then
    echo "ingest enabled"
    # Start reddit worker
    python3 -m worker.reddit_worker &
+
+   python3 -m worker.subreddit_worker &
 fi
 
 if [ "$INDEX_ENABLED" = "true" ] ; then

@@ -100,8 +100,10 @@ services:
       INDEX_DELAY: 300
       SUBREDDITS: "asdf,asdf"
       FETCH_DELAY: 43200
+      DOWNLOAD_IMAGES: true
     volumes:
       - redarc_ingest_logs:/ingest/logs
+      - redarc_images:/ingest/gallery-dl
     depends_on:
       postgres:
         condition: service_healthy
@@ -121,4 +123,6 @@ volumes:
   redarc_ingest_logs:
     driver: local
   redarc_api_logs:
+    driver: local
+  redarc_images:
     driver: local

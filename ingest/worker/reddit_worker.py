@@ -13,6 +13,7 @@ from rq import get_current_job
 import os
 from psycopg2 import pool
 import psycopg2
+from worker.image_downloader import download_image
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -107,6 +108,10 @@ def process_submission(submission):
     logging.debug("Processing submission: " + x['id'])
     if x != None:
         try:
+            if 'i.redd.it' in x['url'] and os.getenv('DOWNLOAD_IMAGES') == 'true':
+                res = download_image(x['url'], x['subreddit'])
+                if res != 0:
+                    logging.error(f"Failed to download image: {submission.url}")
             insert_db(type.SUBMISSION, x)
         except Exception as error:
             raise Exception(error) from None

@@ -12,6 +12,7 @@ RUN pip install rq
 RUN pip install python-dotenv
 RUN pip install praw
 RUN pip install psycopg2-binary
+RUN pip install gallery-dl
 
 RUN chmod +x entry.sh
 CMD ["/bin/bash", "entry.sh"]

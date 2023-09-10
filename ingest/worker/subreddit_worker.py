@@ -25,7 +25,7 @@ Set jobid as hash of thread id and check if jobid exists
 time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
 if not os.path.exists('logs'):
     os.makedirs('logs')
-logging.basicConfig(filename='logs/subreddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='logs/subreddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
 try:
    reddit = praw.Reddit(

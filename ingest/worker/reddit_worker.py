@@ -27,7 +27,7 @@ Redarc worker
 time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
 if not os.path.exists('logs'):
     os.makedirs('logs')
-logging.basicConfig(filename='logs/reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='logs/reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
 try:
     reddit = praw.Reddit(
@@ -156,6 +156,7 @@ def insert_db(_type, data):
         raise Exception(error) from None
 
 if __name__ == "__main__":
+    logging.info("Starting reddit_worker")
     try:
         w = Worker(['url_submit'], connection=redis_conn, log_job_description=False)
         w.work(logging_level=logging.WARNING)

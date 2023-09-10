@@ -15,6 +15,7 @@ from progress import Progress
 from submissions import Submissions
 from status import Status
 from search import Search
+from media import Media
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -45,6 +46,7 @@ submissions = Submissions(pg_pool)
 submit = Submit(url_queue)
 status = Status(pg_pool)
 search = Search(pgfts_pool)
+media = Media(os.getenv('IMAGE_PATH'))
 
 app.add_route('/submit', submit)
 app.add_route('/search/comments', comments)
@@ -53,3 +55,4 @@ app.add_route('/search/subreddits', subreddits)
 app.add_route('/search', search)
 app.add_route('/progress', progress)
 app.add_route('/status', status)
+app.add_route('/media', media)

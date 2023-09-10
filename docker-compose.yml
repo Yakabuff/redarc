@@ -60,8 +60,10 @@ services:
       INGEST_ENABLED: false
       INGEST_PASSWORD: "asdf"
       REDIS_HOST: "redarc_ingest"
+      IMAGE_PATH: "/your/path"
     volumes:
       - redarc_api_logs:/redarc/api/logs
+      - redarc_images:/ingest/gallery-dl
     ports:
       - "80:80"
     depends_on:

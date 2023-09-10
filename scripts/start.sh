@@ -31,9 +31,10 @@ PGFTS_PORT=$PGFTS_PORT
 INGEST_PASSWORD=$INGEST_PASSWORD
 INGEST_ENABLED=$INGEST_ENABLED
 ADMIN_PASSWORD=$ADMIN_PASSWORD
-REDIS_HOST=$REDIS_HOST" > .env
+REDIS_HOST=$REDIS_HOST
+IMAGE_PATH=$IMAGE_PATH" > .env
 # Start API
-gunicorn app &
+gunicorn --workers=4 app &
 
 # Build react frontend
 cd /redarc/frontend

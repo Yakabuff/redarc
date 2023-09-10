@@ -47,6 +47,8 @@ export default function Thread(){
                 score = {post.score}
                 num_comments = {post.num_comments}
                 thumbnail = {post.thumbnail}
+                permalink = {post.permalink}
+                subreddit = {post.subreddit}
             />
 
             {comments.map((comment) => {

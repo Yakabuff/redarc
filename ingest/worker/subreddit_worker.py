@@ -36,7 +36,7 @@ try:
       username=os.getenv('REDDIT_USERNAME'),
    )
 
-   redis_conn = Redis(host='localhost', port=6379)
+   redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=os.getenv('REDIS_PORT'))
 
    url_queue = Queue("url_submit", connection=redis_conn)
 except Exception as error:

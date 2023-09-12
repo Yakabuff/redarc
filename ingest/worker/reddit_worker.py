@@ -10,10 +10,10 @@ from enum import Enum
 import time
 from rq import Worker
 from rq import get_current_job
+from rq import Queue
 import os
 from psycopg2 import pool
 import psycopg2
-from worker.image_downloader import download_image
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -38,8 +38,8 @@ try:
         username=os.getenv('REDDIT_USERNAME'),
     )
 
-    redis_conn = Redis(host='localhost', port=6379)
-
+    redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=os.getenv('REDIS_PORT'))
+    img_queue = Queue("img_urls", connection=redis_conn)
     pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
                                                             password=os.getenv('PG_PASSWORD'),
                                                             host=os.getenv('PG_HOST'),
@@ -109,9 +109,11 @@ def process_submission(submission):
     if x != None:
         try:
             if 'i.redd.it' in x['url'] and os.getenv('DOWNLOAD_IMAGES') == 'true':
-                res = download_image(x['url'], x['subreddit'])
-                if res != 0:
-                    logging.error(f"Failed to download image: {submission.url}")
+                job = img_queue.enqueue('worker.image_downloader.download_image', subreddit=x['subreddit'], url=x['url'])
+                if job.get_status(refresh=True) != "queued":
+                    logging.error(f"Failed to enqueue image url: {x['url']} thread url: {x['permalink']}")
+                else:
+                    logging.info(f"Queued image url: {x['url']} thread url: {x['permalink']}")
             insert_db(type.SUBMISSION, x)
         except Exception as error:
             raise Exception(error) from None

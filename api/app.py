@@ -33,7 +33,7 @@ try:
                                                          port=os.getenv('PGFTS_PORT'),
                                                          database=os.getenv('PGFTS_DATABASE'))
 
-   redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=6379)
+   redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=os.getenv('REDIS_PORT'))
    url_queue = Queue("url_submit", connection=redis_conn)
 except Exception as error:
    logger.error(error)

@@ -60,6 +60,7 @@ services:
       INGEST_ENABLED: false
       INGEST_PASSWORD: "asdf"
       REDIS_HOST: "redarc_ingest"
+      REDIS_PORT: 6379
       IMAGE_PATH: "/your/path"
     volumes:
       - redarc_api_logs:/redarc/api/logs
@@ -103,6 +104,8 @@ services:
       SUBREDDITS: "asdf,asdf"
       FETCH_DELAY: 43200
       DOWNLOAD_IMAGES: true
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
     volumes:
       - redarc_ingest_logs:/ingest/logs
       - redarc_images:/ingest/gallery-dl

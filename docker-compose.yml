@@ -36,32 +36,14 @@ services:
 
   redarc:
     build:
-      context: .
+      context: ./api
       dockerfile: Dockerfile
     image: redarc
     container_name: redarc
     networks:
       - redarc
-    environment:
-      # Replace redarc.mysite.org with your hostname
-      REDARC_API: http://redarc.mysite.org/api/
-      SERVER_NAME: redarc.mysite.org
-      PG_DATABASE: postgres
-      PG_USER: postgres
-      PG_PASSWORD: test1234
-      PG_HOST: pgsql-dev
-      PG_PORT: 5432
-      PGFTS_DATABASE: postgres
-      PGFTS_USER: postgres
-      PGFTS_PASSWORD: test1234
-      PGFTS_HOST: pgsql-fts
-      PGFTS_PORT: 5432
-      ADMIN_PASSWORD: "qwerty"
-      INGEST_ENABLED: false
-      INGEST_PASSWORD: "asdf"
-      REDIS_HOST: "redarc_ingest"
-      REDIS_PORT: 6379
-      IMAGE_PATH: "/your/path"
+    env_file:
+      - .env
     volumes:
       - redarc_api_logs:/redarc/api/logs
       - redarc_images:/ingest/gallery-dl
@@ -72,47 +54,88 @@ services:
         condition: service_healthy
       postgres_fts:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
-  redarc_ingest:
-    build:
-      context: ./ingest
-      dockerfile: Dockerfile
-    image: redarc_ingest
-    container_name: redarc_ingest
+  redis:
+    image: redis:7.0.12-alpine3.18
     networks:
       - redarc
-    environment:
-      INGEST_ENABLED: true
-      INDEX_ENABLED: true
-      PG_DATABASE: postgres
-      PG_USER: postgres
-      PG_PASSWORD: test1234
-      PG_HOST: pgsql-dev
-      PG_PORT: 5432
-      PGFTS_DATABASE: postgres
-      PGFTS_USER: postgres
-      PGFTS_PASSWORD: test1234
-      PGFTS_HOST: pgsql-fts
-      PGFTS_PORT: 5432
-      # Reddit credentials
-      CLIENT_ID: change me
-      CLIENT_SECRET: change me
-      PASSWORD: change me
-      USER_AGENT: "my user agent"
-      REDDIT_USERNAME: "change me"
-      INDEX_DELAY: 300
-      SUBREDDITS: "asdf,asdf"
-      FETCH_DELAY: 43200
-      DOWNLOAD_IMAGES: true
-      REDIS_HOST: localhost
-      REDIS_PORT: 6379
+    ports:
+      - '6379:6379'
+    command: redis-server
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      timeout: 10s
+      retries: 10
+
+  image_downloader:
+    build:
+      context: ./ingest/image_downloader
+      dockerfile: Dockerfile
+    image: image_downloader
+    container_name: image_downloader
+    networks:
+      - redarc
+    env_file:
+      - .env
     volumes:
       - redarc_ingest_logs:/ingest/logs
       - redarc_images:/ingest/gallery-dl
     depends_on:
+      redis:
+        condition: service_healthy
+
+  index_worker:
+    build:
+      context: ./ingest/index_worker
+      dockerfile: Dockerfile
+    image: index_worker
+    container_name: index_worker
+    networks:
+      - redarc
+    env_file:
+      - .env
+    volumes:
+      - redarc_ingest_logs:/ingest/logs
+    depends_on:
       postgres:
         condition: service_healthy
       postgres_fts:
+        condition: service_healthy
+
+  reddit_worker:
+    build:
+      context: ./ingest/reddit_worker
+      dockerfile: Dockerfile
+    image: reddit_worker
+    container_name: reddit_worker
+    networks:
+      - redarc
+    env_file:
+      - .env
+    volumes:
+      - redarc_ingest_logs:/ingest/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  subreddit_worker:
+    build:
+      context: ./ingest/subreddit_worker
+      dockerfile: Dockerfile
+    image: subreddit_worker
+    container_name: subreddit_worker
+    networks:
+      - redarc
+    env_file:
+      - .env
+    volumes:
+      - redarc_ingest_logs:/ingest/logs
+    depends_on:
+      redis:
         condition: service_healthy
 
 networks:

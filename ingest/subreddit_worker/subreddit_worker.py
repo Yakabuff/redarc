@@ -62,7 +62,6 @@ def watch_subreddit(subreddit):
    rising = reddit.subreddit(subreddit).rising(limit=25)
    for r in rising:
       id = hashlib.md5(r.id.encode('utf-8')).hexdigest() 
-      exists = job_exists(id)
       if not id in ids:
          ids[id] = (r.id, r.permalink)
    return ids
@@ -77,7 +76,7 @@ def work():
          try:
             if not job_exists(id):
                logging.info("Queuing thread id "+ id)
-               job = url_queue.enqueue('worker.reddit_worker.fetch_thread', thread_id=id, url=url, job_id=i)
+               job = url_queue.enqueue('reddit_worker.fetch_thread', thread_id=id, url=url, job_id=i)
                if job.get_status(refresh=True) != "queued":
                   logging.error(f"Failed to enqueue job: thread ID {id}")
          except Exception as error:

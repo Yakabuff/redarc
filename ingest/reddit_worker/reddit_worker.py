@@ -3,7 +3,7 @@ import sys
 import traceback
 from redis import Redis
 import logging
-from worker.validate import validate_submission, validate_comment
+from validate import validate_submission, validate_comment
 import time
 import praw
 from enum import Enum
@@ -109,7 +109,7 @@ def process_submission(submission):
     if x != None:
         try:
             if 'i.redd.it' in x['url'] and os.getenv('DOWNLOAD_IMAGES') == 'true':
-                job = img_queue.enqueue('worker.image_downloader.download_image', subreddit=x['subreddit'], url=x['url'])
+                job = img_queue.enqueue('image_downloader.download_image', subreddit=x['subreddit'], url=x['url'])
                 if job.get_status(refresh=True) != "queued":
                     logging.error(f"Failed to enqueue image url: {x['url']} thread url: {x['permalink']}")
                 else:

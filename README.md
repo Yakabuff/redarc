@@ -57,8 +57,9 @@ Modify envars as needed
 $ git clone https://github.com/Yakabuff/redarc.git
 $ cd redarc
 $ git fetch --all --tags
-$ git checkout tags/v0.2.0 -b v0.2.0
-// Modify docker-compose.yml as-needed
+$ git checkout tags/v0.5.0 -b v0.5.0
+// Modify .env as-needed
+$ cp default.env .env
 $ docker compose up -d
 ```
 
@@ -168,16 +169,20 @@ Fill in .env files with your own credentials.
 Setting an `INGEST_PASSWORD` is highly recommended in order to prevent abuse.
 
 ```
-$ cd redarc/redarc_ingest
+$ docker pull redis
+$ docker run --name some-redis -d redis
+$ cd redarc/ingest
 $ python -m venv venv
 $ source venv/bin/activate
 $ pip install rq
 $ pip install python-dotenv
 $ pip install praw
 $ pip install psycopg2-binary
-$ python3 -m worker.reddit_worker &
-$ python3 -m worker.index_worker &
-$ python3 -m worker.subreddit_worker &
+$ pip install gallery-dl
+$ python3 ingest/reddit_worker/reddit_worker.py
+$ python3 ingest/index_worker/index_worker.py
+$ python3 ingest/subreddit_worker/subreddit_worker.py
+$ python3 ingest/image_downloader/image_downloader.py
 ```
 
 # Ingest data:

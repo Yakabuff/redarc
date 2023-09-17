@@ -1,4 +1,4 @@
-FROM alpine3.18
+FROM alpine:3.18
 
 RUN apk update
 
@@ -13,4 +13,4 @@ RUN pip install python-dotenv
 RUN pip install praw
 RUN pip install psycopg2-binary
 
-CMD ["/bin/python3", "reddit_worker.py"]
+CMD ["python3", "reddit_worker.py"]

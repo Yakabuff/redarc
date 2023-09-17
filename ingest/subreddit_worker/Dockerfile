@@ -1,4 +1,4 @@
-FROM alpine3.18
+FROM alpine:3.18
 
 RUN apk update
 
@@ -12,5 +12,4 @@ RUN pip install rq
 RUN pip install python-dotenv
 RUN pip install praw
 
-RUN chmod +x entry.sh
-CMD ["/bin/python3", "subreddit_worker"]
+CMD ["python3", "subreddit_worker.py"]

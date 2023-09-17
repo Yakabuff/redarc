@@ -36,7 +36,7 @@ services:
 
   redarc:
     build:
-      context: ./api
+      context: .
       dockerfile: Dockerfile
     image: redarc
     container_name: redarc
@@ -59,6 +59,7 @@ services:
 
   redis:
     image: redis:7.0.12-alpine3.18
+    container_name: redis
     networks:
       - redarc
     ports:
@@ -80,8 +81,8 @@ services:
     env_file:
       - .env
     volumes:
-      - redarc_ingest_logs:/ingest/logs
-      - redarc_images:/ingest/gallery-dl
+      - redarc_ingest_logs:/image_downloader/logs
+      - redarc_images:/image_downloader/gallery-dl
     depends_on:
       redis:
         condition: service_healthy
@@ -97,7 +98,7 @@ services:
     env_file:
       - .env
     volumes:
-      - redarc_ingest_logs:/ingest/logs
+      - redarc_ingest_logs:/index_worker/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -115,7 +116,7 @@ services:
     env_file:
       - .env
     volumes:
-      - redarc_ingest_logs:/ingest/logs
+      - redarc_ingest_logs:/reddit_worker/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -133,7 +134,7 @@ services:
     env_file:
       - .env
     volumes:
-      - redarc_ingest_logs:/ingest/logs
+      - redarc_ingest_logs:/subreddit_worker/logs
     depends_on:
       redis:
         condition: service_healthy

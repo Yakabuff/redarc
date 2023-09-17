@@ -1,4 +1,4 @@
-FROM alpine3.18
+FROM alpine:3.18
 
 RUN apk update
 
@@ -11,4 +11,4 @@ COPY . .
 RUN pip install python-dotenv
 RUN pip install psycopg2-binary
 
-CMD ["/bin/python3", "index_worker.py"]
+CMD ["python3", "index_worker.py"]

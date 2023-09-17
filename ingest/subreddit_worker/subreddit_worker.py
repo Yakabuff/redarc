@@ -94,6 +94,7 @@ def job_exists(id):
    return False
 
 if __name__ == "__main__":
+   logging.info("Starting subreddit_worker")
    try:
       while True:
         work()

@@ -142,6 +142,7 @@ if __name__ == "__main__":
    if not os.path.exists('logs'):
       os.makedirs('logs')
    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='logs/index_worker-'+time_now+'.log', encoding='utf-8', level=logging.ERROR, datefmt='%Y-%m-%d %H:%M:%S')
+   logging.info("Starting index_worker")
    try:
       index_db()
       while True:

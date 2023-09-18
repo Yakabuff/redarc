@@ -1,5 +1,5 @@
-import datetime
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 import sys
 import time
@@ -10,11 +10,17 @@ from rq import Worker
 from dotenv import load_dotenv
 load_dotenv()
 
-time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
 if not os.path.exists('logs'):
     os.makedirs('logs')
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='logs/img_downloader_worker-'+time_now+'.log', encoding='utf-8', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
-
+filename = 'logs/img_downloader_worker.log'
+handler = RotatingFileHandler(filename,
+                              maxBytes=1024*1024*50,
+                              backupCount=999)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+                     encoding='utf-8',
+                     level=logging.INFO,
+                     datefmt='%Y-%m-%d %H:%M:%S',
+                     handlers=[handler])
 try:
    redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=os.getenv('REDIS_PORT'))
 except Exception as error:

@@ -1,4 +1,4 @@
-import datetime
+from logging.handlers import RotatingFileHandler
 import sys
 import traceback
 from redis import Redis
@@ -24,10 +24,17 @@ Redarc worker
 2) Insert into DB if comment/submission ID does not exist.  If exist, update gilded, upvotes if number higher.  Update score
 """
 
-time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
 if not os.path.exists('logs'):
     os.makedirs('logs')
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='logs/reddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+filename = 'logs/reddit_worker.log'
+handler = RotatingFileHandler(filename,
+                            maxBytes=1024*1024*50,
+                            backupCount=999)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+                    encoding='utf-8',
+                    level=logging.INFO,
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    handlers=[handler])
 
 try:
     reddit = praw.Reddit(

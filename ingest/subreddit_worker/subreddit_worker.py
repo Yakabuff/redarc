@@ -1,5 +1,5 @@
-import datetime
 import hashlib
+from logging.handlers import RotatingFileHandler
 import sys
 from redis import Redis
 import logging
@@ -22,10 +22,17 @@ https://stackoverflow.com/questions/70970403/how-to-check-if-a-similar-scheduled
 Set jobid as hash of thread id and check if jobid exists
 """
 
-time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
 if not os.path.exists('logs'):
-    os.makedirs('logs')
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='logs/subreddit_worker-'+time_now+'.log', encoding='utf-8', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+   os.makedirs('logs')
+filename = 'logs/subreddit_worker.log'
+handler = RotatingFileHandler(filename,
+                           maxBytes=1024*1024*50,
+                           backupCount=999)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+                     encoding='utf-8',
+                     level=logging.INFO,
+                     datefmt='%Y-%m-%d %H:%M:%S',
+                     handlers=[handler])
 
 try:
    reddit = praw.Reddit(

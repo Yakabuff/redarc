@@ -1,4 +1,4 @@
-import datetime
+from logging.handlers import RotatingFileHandler
 import os
 import sys
 import time
@@ -9,6 +9,17 @@ from psycopg2 import pool
 import psycopg2
 
 load_dotenv()
+if not os.path.exists('logs'):
+   os.makedirs('logs')
+filename = 'logs/index_worker.log'
+handler = RotatingFileHandler(filename,
+                           maxBytes=1024*1024*50,
+                           backupCount=999)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+                     encoding='utf-8',
+                     level=logging.INFO,
+                     datefmt='%Y-%m-%d %H:%M:%S',
+                     handlers=[handler])
 try:
    pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
                                                          password=os.getenv('PG_PASSWORD'),
@@ -122,7 +133,7 @@ def index_db():
       subreddits = cursor.fetchall()
       cursor.execute("DELETE from subreddits;")
       for row in subreddits:
-         logging.info("Updating index table:" + str(row[0]))
+         logging.debug("Updating index table:" + str(row[0]))
          cursor.execute("select COUNT(*) from submissions where subreddit = %s;", (row))
          num_submissions = cursor.fetchone()
 
@@ -138,10 +149,6 @@ def index_db():
       logging.error(error)
 
 if __name__ == "__main__":
-   time_now  = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S') 
-   if not os.path.exists('logs'):
-      os.makedirs('logs')
-   logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='logs/index_worker-'+time_now+'.log', encoding='utf-8', level=logging.ERROR, datefmt='%Y-%m-%d %H:%M:%S')
    logging.info("Starting index_worker")
    try:
       index_db()

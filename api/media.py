@@ -22,3 +22,4 @@ class Media:
       resp.content_type = mimetypes.guess_type(path)[0]
       resp.status = falcon.HTTP_200 
       resp.content_length = content_length
+      resp.viewable_as = file

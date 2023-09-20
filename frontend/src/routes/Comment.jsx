@@ -7,13 +7,15 @@ export default function Comment(props){
    const id = props.id;
    const replies = props.replies;
    const depth = props.depth;
+   const threadPermalink = props.threadPermalink;
+   const commentPermalink = props.threadPermalink + id;
    return(
       <>
       <div>
          <h4> 
             <span class="label label-success">Anonymous</span>&nbsp;
             <span class="label label-important">⬆ {score} 🪙 {gilded}</span>&nbsp;
-            <span class="label label-info">{date}</span>&nbsp;
+            <span class="label label-info"><a style={{color: 'inherit'}} href={`https://reddit.com${commentPermalink}`}>{date}</a></span>&nbsp;
             <span class="label label-default">{replies.length} replies</span>
          </h4>
          <div class="well">{<p>{body}</p>}</div>
@@ -30,6 +32,8 @@ export default function Comment(props){
                   gilded = {comment.gilded}
                   date = {new Date(parseInt(comment.created_utc * 1000)).toISOString()}
                   replies = {comment.replies}
+                  threadPermalink = {threadPermalink}
+                  commentPermalink = {threadPermalink + comment.id}
                   depth = {depth+1} />
                }
             </div>

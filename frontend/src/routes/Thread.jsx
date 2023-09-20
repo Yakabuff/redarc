@@ -61,6 +61,8 @@ export default function Thread(){
                     gilded = {comment.gilded}
                     date = {new Date(parseInt(comment.created_utc * 1000)).toISOString()}
                     replies = {comment.replies}
+                    threadPermalink = {post.permalink}
+                    commentPermalink = {post.permalink + comment.id}
                     depth = {0} />
                 )
             })}

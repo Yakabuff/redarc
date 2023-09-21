@@ -19,7 +19,6 @@ from media import Media
 from dotenv import load_dotenv
 load_dotenv()
 
-app = application = falcon.App(cors_enable=True)
 try:
    pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
                                                          password=os.getenv('PG_PASSWORD'),
@@ -37,7 +36,10 @@ try:
    url_queue = Queue("url_submit", connection=redis_conn)
 except Exception as error:
    logger.error(error)
-   sys.exit(1)
+   # https://stackoverflow.com/questions/41071262/how-to-stop-gunicorn-when-flask-application-exits
+   sys.exit(4)
+
+app = application = falcon.App(cors_enable=True)
 
 comments = Comments(pg_pool)
 subreddits = Subreddits(pg_pool)

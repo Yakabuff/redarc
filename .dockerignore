@@ -6,3 +6,9 @@ postgres-docker
 config.json
 *.log
 redarc-ingest*
+docs/
+ingest/
+LICENSE
+docker-compose.yml
+Dockerfile
+README.md

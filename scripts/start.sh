@@ -20,7 +20,7 @@ gunicorn --workers=4 app &
 
 # Build react frontend
 cd /redarc/frontend
-echo "VITE_API_DOMAIN=$REDARC_API" > .env
+echo "VITE_API_DOMAIN=$REDARC_FE_API" > .env
 npm run build
 
 # Move assets to NGINX

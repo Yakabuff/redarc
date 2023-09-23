@@ -7,6 +7,7 @@ A self-hosted solution to search, view and create your own Reddit archives.
 - Fulltext search via PostgresFTS
 - Submit threads to be archived via API (Completely untested.  Developed with mock data and the [PRAW](https://praw.readthedocs.io/en/stable/) documentation)
 - Periodically fetch rising, new and hot threads from specified subreddits
+- Download `i.redd.it` images from threads.
 
 Please abide by the Reddit Terms of Service and [User Agreement](https://www.redditinc.com/policies/user-agreement-april-18-2023) if you are using their API
 
@@ -41,12 +42,12 @@ If you are using redarc on your personal machine, set docker envars `REDARC_API=
 `REDARC_API` is the URL of your API server; it must end with `/api` 
 eg: `http://redarc.mysite.org/api`.  
 
-`REDARC_SUBMIT` is the URL of your submission service; it must end with `/ingest` 
-eg: `http://redarc.mysite.org/ingest`.  
+`REDARC_FE_API` is the URL of the API server you want the frontend to send requests to.  
+If you are not using a reverse proxy, it should be the same as `REDARC_API`.
 
 `SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.mysite.org`
 
-Setting an `INGEST_PASSWORD` in redarc_ingest is highly recommended to prevent abuse.
+Setting an `INGEST_PASSWORD` and `ADMIN_PASSWORD` in your API is highly recommended to prevent abuse.
 
 ## Docker compose (Recommended):
 
@@ -57,7 +58,7 @@ Modify envars as needed
 $ git clone https://github.com/Yakabuff/redarc.git
 $ cd redarc
 $ git fetch --all --tags
-$ git checkout tags/v0.5.0 -b v0.5.0
+$ git checkout tags/v0.5.1 -b v0.5.1
 // Modify .env as-needed
 $ cp default.env .env
 $ docker compose up -d
@@ -166,8 +167,6 @@ systemctl restart nginx
 
 Fill in .env files with your own credentials.
 
-Setting an `INGEST_PASSWORD` is highly recommended in order to prevent abuse.
-
 ```
 $ docker pull redis
 $ docker run --name some-redis -d redis
@@ -214,7 +213,8 @@ $ python3 scripts/load_comments_fts.py <path_to_comment_file>
 $ python3 scripts/index.py [subreddit_name]
 
 # Optional
-python3 scripts/unlist.py <subreddit> <true|false>
+$ python3 scripts/unlist.py <subreddit> <true|false>
+$ python3 scripts/backfill_images.py <subreddit> <after timestamp utc> <num urls>
 ```
 
 ## Web:

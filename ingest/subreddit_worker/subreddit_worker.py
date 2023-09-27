@@ -54,19 +54,19 @@ def watch_subreddit(subreddit):
    # Get intersection of new posts and rising posts and hot posts
    # Insert ids into a set
    ids = {}
-   hot = reddit.subreddit(subreddit).hot(limit=25)
+   hot = reddit.subreddit(subreddit).hot(limit=os.getenv('NUM_THREADS'))
    for h in hot:
       id = hashlib.md5(h.id.encode('utf-8')).hexdigest() 
       if not id in ids:
          ids[id] = (h.id, h.permalink)
 
-   new = reddit.subreddit(subreddit).new(limit=25)
+   new = reddit.subreddit(subreddit).new(limit=os.getenv('NUM_THREADS'))
    for n in new:
       id = hashlib.md5(n.id.encode('utf-8')).hexdigest() 
       if not id in ids:
          ids[id] = (n.id, n.permalink)
 
-   rising = reddit.subreddit(subreddit).rising(limit=25)
+   rising = reddit.subreddit(subreddit).rising(limit=os.getenv('NUM_THREADS'))
    for r in rising:
       id = hashlib.md5(r.id.encode('utf-8')).hexdigest() 
       if not id in ids:

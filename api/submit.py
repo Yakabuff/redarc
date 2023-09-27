@@ -52,7 +52,7 @@ class Submit:
         resp.status = falcon.HTTP_500
         return
       
-      id = hashlib.md5(id.encode('utf-8')).hexdigest() 
+      jid = hashlib.md5(id.encode('utf-8')).hexdigest() 
       exists = self.job_exists(id)
       if exists[0] == True:
         resp.text = json.dumps({"status": "success", "id": id, "position": exists[1].get_position()}, ensure_ascii=False)
@@ -60,7 +60,7 @@ class Submit:
         return
 
       try:
-        job = self.url_queue.enqueue('worker.reddit_worker.fetch_thread', thread_id=id, url=url, job_id=id)
+        job = self.url_queue.enqueue('reddit_worker.fetch_thread', thread_id=id, url=url, job_id=jid)
         if job.get_status(refresh=True) == "queued":
           resp.text = json.dumps({"status": "success", "id": id, "position": job.get_position()}, ensure_ascii=False)
           resp.status = falcon.HTTP_200

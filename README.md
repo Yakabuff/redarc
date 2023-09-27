@@ -78,7 +78,7 @@ $ docker run \
   --name pgsql-dev \
   -e POSTGRES_PASSWORD=test1234 \
   -d \
-  -v ${PWD}/postgres-docker:/var/lib/postgresql/data \
+  -v postgres-docker:/var/lib/postgresql/data \
   -p 5432:5432 postgres 
 ```
 
@@ -87,7 +87,7 @@ $ docker run \
   --name pgsql-fts \
   -e POSTGRES_PASSWORD=test1234 \
   -d \
-  -v ${PWD}/postgres-docker:/var/lib/postgresql/data \
+  -v postgresfts-docker:/var/lib/postgresql/data \
   -p 5433:5432 postgres 
 ```
 

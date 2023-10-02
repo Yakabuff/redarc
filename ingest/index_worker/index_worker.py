@@ -2,9 +2,11 @@ from logging.handlers import RotatingFileHandler
 import os
 import sys
 import time
+import traceback
 from dotenv import load_dotenv
 import logging
 from psycopg2.extensions import AsIs
+from psycopg2.extras import execute_values
 from psycopg2 import pool
 import psycopg2
 
@@ -13,8 +15,8 @@ if not os.path.exists('logs'):
    os.makedirs('logs')
 filename = 'logs/index_worker.log'
 handler = RotatingFileHandler(filename,
-                           maxBytes=1024*1024*50,
-                           backupCount=999)
+                           maxBytes=1024*1024*10,
+                           backupCount=10)
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                      encoding='utf-8',
                      level=logging.INFO,
@@ -39,62 +41,107 @@ except Exception as error:
     logging.error(error)
     sys.exit(1)
 
-def insert_search(_type, data):
-   #Insert data into postgres fts
+last_submission_id = None
+last_comment_id = None
+
+def insert_search_submission(data):
    try:
       pgfts_con = pg_pool_fts.getconn()
       cursor = pgfts_con.cursor()
 
       insert_submission = """
-      insert into submissions (id, subreddit, title, num_comments, score, gilded, created_utc, self_text) values (%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING
+      insert into submissions (id, subreddit, title, num_comments,
+      score, gilded, created_utc, self_text)
+      values %s ON CONFLICT (id) DO NOTHING
       """
-
-      insert_comment = """
-      insert into comments (id, subreddit, body, score, gilded, created_utc, link_id) values (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING
-      """
+      _data = []
       for i in data:
-         if _type == 'comments':
-            cursor.execute(insert_comment, i[:-1])
-         else:
-            cursor.execute(insert_submission, i[:-1])
+         _data.append(i[:-1]) # Remove retrieved_utc column
+      # Bulk insert rows
+      execute_values(cursor, insert_submission, _data)
+      logging.info(f'Indexed {cursor.rowcount} submissions')
+      
       pgfts_con.commit()
       pg_pool_fts.putconn(pgfts_con)
    except Exception as error:
+      logging.error(error)
+      logging.error(traceback.format_exc())
+      raise Exception(error) from None
+
+def insert_search_comment(data):
+   try:
+      pgfts_con = pg_pool_fts.getconn()
+      cursor = pgfts_con.cursor()
+
+      insert_comment = """
+      insert into comments (id, subreddit, body, score, gilded,
+      created_utc, link_id) values %s
+      ON CONFLICT (id) DO NOTHING
+      """
+      _data = []
+      for i in data:
+         _data.append(i[:-1]) # Remove retrieved_utc column
+      # Bulk insert rows
+      execute_values(cursor, insert_comment, _data)
+      logging.info(f'Indexed {cursor.rowcount} comments')
+      
+      pgfts_con.commit()
+      pg_pool_fts.putconn(pgfts_con)
+   except Exception as error:
+      logging.error(error)
+      logging.error(traceback.format_exc())
       raise Exception(error) from None
 
 # find n ids starting with lowest retrieved_utc and index_utc == None
 def find_ids():
    # fetch search index progress for submissions/comments
-   # fetch 10k submissions/comments sort by retrieved_utc and create_utc 
-   # where retrieved_utc >= progress_retrieved_utc and created_utc >= progress_created_utc
-   # Note: edge case where content previously indexed in same date range is indexed again
+   # fetch 10k submissions/comments sort by retrieved_utc
+   # where retrieved_utc >= progress_retrieved_utc
+   # Note: edge case where content previously indexed in same date range is indexed again.
+   # Can cause problems if >= 10k items in same retrieved_utc range; will keep indexing same rows
+   # Try querying for retrieved_utc = %s and created_utc >= %s if last item id is the same for 10k bug
+   # Should be impossible under regular conditions
    try:
       cursor.execute('''select * from search_status_submissions''')
       sss = cursor.fetchone()
       if sss == None:
-         sss = (0, 0)
-      cursor.execute('''select id, subreddit, title, num_comments, score, gilded, created_utc, self_text, retrieved_utc from submissions where retrieved_utc >= %s
-         and created_utc >= %s ORDER BY retrieved_utc ASC, created_utc ASC LIMIT 10000''', (sss[1], sss[0]))
+         sss = (0, 0) # (created_utc, retrieved_utc)
+      cursor.execute('''select id, subreddit, title, num_comments,
+                     score, gilded, created_utc, self_text,
+                     retrieved_utc from submissions where retrieved_utc >= %s
+                     ORDER BY retrieved_utc ASC, created_utc ASC 
+                     LIMIT 10000''', (sss[1],))
       subs = cursor.fetchall()
-      subs_indexed = len(subs)
+
       if len(subs) > 0:
-         insert_search('submissions', subs)
+         insert_search_submission(subs)
          update_search_indexed_status('submissions', subs[-1])
       cursor.execute('''select * from search_status_comments''')
       ssc = cursor.fetchone()
       if ssc == None:
          ssc = (0, 0)
-      cursor.execute('''select id, subreddit, body, score, gilded, created_utc, link_id, retrieved_utc from comments where retrieved_utc >= %s
-         and created_utc >= %s ORDER BY retrieved_utc, created_utc ASC LIMIT 10000''', (ssc[1], ssc[0]))
+      cursor.execute('''select id, subreddit, body, score, gilded, created_utc,
+                     link_id, retrieved_utc from comments where retrieved_utc >= %s
+                     ORDER BY retrieved_utc ASC, created_utc ASC  
+                     LIMIT 10000''', (ssc[1],))
       coms = cursor.fetchall()
-      coms_indexed = len(coms)
+
       if len(coms) > 0:
-         insert_search('comments', coms)
+         insert_search_comment(coms)
          update_search_indexed_status('comments', coms[-1])
       pg_con.commit()
       # pg_pool.putconn(pg_con)
-      return (subs_indexed, coms_indexed)
+      # Determine if indexer should continue or sleep
+      global last_comment_id
+      global last_submission_id
+      # Check if indexer is processing new ids
+      if coms[-1][0] == last_comment_id and subs[-1][0] == last_submission_id:
+         return False
+      last_comment_id = coms[-1][0]
+      last_submission_id = subs[-1][0]
+      return True
    except Exception as error:
+      logging.error(traceback.format_exc())
       raise Exception(error) from None
 
 def update_search_indexed_status(_type, last_indexed):
@@ -124,6 +171,7 @@ def update_search_indexed_status(_type, last_indexed):
          cursor.execute(drop_sql, (AsIs(table_type),))
          cursor.execute(insert_sql, (AsIs(table_type), created_utc, retrieved_utc)) #created_utc and retrieved_utc
    except Exception as error:
+      logging.error(traceback.format_exc())
       raise Exception(error) from None
 
 def index_db():
@@ -148,15 +196,143 @@ def index_db():
    except Exception as error:
       logging.error(error)
 
+def find_submissions():
+   try:
+      cursor.execute('''select * from search_status_submissions''')
+      sss = cursor.fetchone()
+      if sss == None:
+         sss = (0, 0) # (created_utc, retrieved_utc)
+      cursor.execute('''select id, subreddit, title, num_comments,
+                     score, gilded, created_utc, self_text,
+                     retrieved_utc from submissions where retrieved_utc >= %s
+                     ORDER BY retrieved_utc ASC, created_utc ASC 
+                     LIMIT 10000''', (sss[1],))
+      subs = cursor.fetchall()
+      return subs
+   except Exception as error:
+      logging.error(traceback.format_exc())
+      raise Exception(error) from None
+
+def find_comments():
+   try:
+      cursor.execute('''select * from search_status_comments''')
+      ssc = cursor.fetchone()
+      if ssc == None:
+         ssc = (0, 0)
+      cursor.execute('''select id, subreddit, body, score, gilded, created_utc,
+                     link_id, retrieved_utc from comments where retrieved_utc >= %s
+                     ORDER BY retrieved_utc ASC, created_utc ASC  
+                     LIMIT 10000''', (ssc[1],))
+      coms = cursor.fetchall()
+      return coms
+   except Exception as error:
+      logging.error(traceback.format_exc())
+      raise Exception(error) from None  
+
+def find_submissions_in_range():
+   try:
+      cursor.execute('''select * from search_status_submissions''')
+      sss = cursor.fetchone()
+      if sss == None:
+         sss = (0, 0) # (created_utc, retrieved_utc)
+      cursor.execute('''select id, subreddit, title, num_comments,
+                     score, gilded, created_utc, self_text,
+                     retrieved_utc from submissions where retrieved_utc = %s
+                     and created_utc >= %s
+                     ORDER BY retrieved_utc ASC, created_utc ASC 
+                     LIMIT 10000''', (sss[1],sss[0]))
+      subs = cursor.fetchall()
+      return subs
+   except Exception as error:
+      logging.error(traceback.format_exc())
+      raise Exception(error) from None
+
+def find_comments_in_range():
+   try:
+      cursor.execute('''select * from search_status_comments''')
+      ssc = cursor.fetchone()
+      if ssc == None:
+         ssc = (0, 0)
+      cursor.execute('''select id, subreddit, body, score, gilded, created_utc,
+                     link_id, retrieved_utc from comments where retrieved_utc = %s
+                     and created_utc >= %s
+                     ORDER BY retrieved_utc ASC, created_utc ASC  
+                     LIMIT 10000''', (ssc[1],ssc[0]))
+      coms = cursor.fetchall()
+      return coms
+   except Exception as error:
+      logging.error(traceback.format_exc())
+      raise Exception(error) from None  
+
+def index_submissions():
+   try:
+      subs = find_submissions()
+      if len(subs) > 0:
+         insert_search_submission(subs)
+         update_search_indexed_status('submissions', subs[-1])
+         pg_con.commit()
+      global last_submission_id
+
+      # Check if indexer is processing new ids
+      if subs[-1][0] == last_submission_id:
+         # Check number of ids where retrieved_utc = %s > 10000 to really make sure no new submissions
+         # If there are new submissions, find submissions again with created_utc and same retrieved_utc
+         # and update index
+         logging.info(f"No new submissions found in retrieved_utc date range {subs[-1][-1]}...")
+         res = find_submissions_in_range()
+         if len(res) > 0 and res[-1][0] != last_submission_id:
+            logging.info(f"Found new submissions in retrieved_utc range: {res[-1][-1]} created_utc: {res[-1][5]}")
+            insert_search_submission(res)
+            update_search_indexed_status('submissions', res[-1])
+            pg_con.commit()
+            last_submission_id = res[-1][0]
+            return True
+         return False
+      
+      last_submission_id = subs[-1][0]
+      return True
+   except Exception as error:
+      logging.error(traceback.format_exc())
+      raise Exception(error) from None
+   
+def index_comments():
+   try:
+      coms = find_comments()
+      if len(coms) > 0:
+         insert_search_comment(coms)
+         update_search_indexed_status('comments', coms[-1])
+         pg_con.commit()
+      global last_comment_id
+      if coms[-1][0] == last_comment_id:
+         logging.info(f"No new comments found in retrieved_utc date range {coms[-1][-1]}...")
+         res = find_comments_in_range()
+         if len(res) > 0 and res[-1][0] != last_comment_id:
+            logging.info(f"Found new comments in retrieved_utc range: {res[-1][-1]} created_utc: {res[-1][5]}")
+            insert_search_comment(res)
+            update_search_indexed_status('comments', res[-1])
+            pg_con.commit()
+            last_comment_id = res[-1][0]
+            return True
+         return False
+      last_comment_id = coms[-1][0]
+      return True
+   except Exception as error:
+      logging.error(traceback.format_exc())
+      raise Exception(error) from None
+
 if __name__ == "__main__":
    logging.info("Starting index_worker")
    try:
       index_db()
       while True:
-         res = find_ids()
-         if (res[0] < 10000 and res[1] < 10000):
-            index_db()
+         res1 = index_submissions()
+         res2 = index_comments()
+         if ((res1 and res2) == False):
+            logging.debug("No new threads/comments found... Sleeping")
             time.sleep(int(os.getenv('INDEX_DELAY')))
+         else:
+            index_db()
    except Exception as error:
       logging.error(error)
+      logging.error(traceback.format_exc())
 

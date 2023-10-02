@@ -92,58 +92,6 @@ def insert_search_comment(data):
       logging.error(traceback.format_exc())
       raise Exception(error) from None
 
-# find n ids starting with lowest retrieved_utc and index_utc == None
-def find_ids():
-   # fetch search index progress for submissions/comments
-   # fetch 10k submissions/comments sort by retrieved_utc
-   # where retrieved_utc >= progress_retrieved_utc
-   # Note: edge case where content previously indexed in same date range is indexed again.
-   # Can cause problems if >= 10k items in same retrieved_utc range; will keep indexing same rows
-   # Try querying for retrieved_utc = %s and created_utc >= %s if last item id is the same for 10k bug
-   # Should be impossible under regular conditions
-   try:
-      cursor.execute('''select * from search_status_submissions''')
-      sss = cursor.fetchone()
-      if sss == None:
-         sss = (0, 0) # (created_utc, retrieved_utc)
-      cursor.execute('''select id, subreddit, title, num_comments,
-                     score, gilded, created_utc, self_text,
-                     retrieved_utc from submissions where retrieved_utc >= %s
-                     ORDER BY retrieved_utc ASC, created_utc ASC 
-                     LIMIT 10000''', (sss[1],))
-      subs = cursor.fetchall()
-
-      if len(subs) > 0:
-         insert_search_submission(subs)
-         update_search_indexed_status('submissions', subs[-1])
-      cursor.execute('''select * from search_status_comments''')
-      ssc = cursor.fetchone()
-      if ssc == None:
-         ssc = (0, 0)
-      cursor.execute('''select id, subreddit, body, score, gilded, created_utc,
-                     link_id, retrieved_utc from comments where retrieved_utc >= %s
-                     ORDER BY retrieved_utc ASC, created_utc ASC  
-                     LIMIT 10000''', (ssc[1],))
-      coms = cursor.fetchall()
-
-      if len(coms) > 0:
-         insert_search_comment(coms)
-         update_search_indexed_status('comments', coms[-1])
-      pg_con.commit()
-      # pg_pool.putconn(pg_con)
-      # Determine if indexer should continue or sleep
-      global last_comment_id
-      global last_submission_id
-      # Check if indexer is processing new ids
-      if coms[-1][0] == last_comment_id and subs[-1][0] == last_submission_id:
-         return False
-      last_comment_id = coms[-1][0]
-      last_submission_id = subs[-1][0]
-      return True
-   except Exception as error:
-      logging.error(traceback.format_exc())
-      raise Exception(error) from None
-
 def update_search_indexed_status(_type, last_indexed):
    # Update status with most recently indexed posts
    table_type = "search_status_comments" if _type == "comments" else "search_status_submissions"
@@ -170,6 +118,7 @@ def update_search_indexed_status(_type, last_indexed):
       if cursor.rowcount != 1:
          cursor.execute(drop_sql, (AsIs(table_type),))
          cursor.execute(insert_sql, (AsIs(table_type), created_utc, retrieved_utc)) #created_utc and retrieved_utc
+      pg_con.commit()
    except Exception as error:
       logging.error(traceback.format_exc())
       raise Exception(error) from None
@@ -270,7 +219,6 @@ def index_submissions():
       if len(subs) > 0:
          insert_search_submission(subs)
          update_search_indexed_status('submissions', subs[-1])
-         pg_con.commit()
       global last_submission_id
 
       # Check if indexer is processing new ids
@@ -284,7 +232,6 @@ def index_submissions():
             logging.info(f"Found new submissions in retrieved_utc range: {res[-1][-1]} created_utc: {res[-1][5]}")
             insert_search_submission(res)
             update_search_indexed_status('submissions', res[-1])
-            pg_con.commit()
             last_submission_id = res[-1][0]
             return True
          return False
@@ -301,7 +248,6 @@ def index_comments():
       if len(coms) > 0:
          insert_search_comment(coms)
          update_search_indexed_status('comments', coms[-1])
-         pg_con.commit()
       global last_comment_id
       if coms[-1][0] == last_comment_id:
          logging.info(f"No new comments found in retrieved_utc date range {coms[-1][-1]}...")
@@ -310,7 +256,6 @@ def index_comments():
             logging.info(f"Found new comments in retrieved_utc range: {res[-1][-1]} created_utc: {res[-1][5]}")
             insert_search_comment(res)
             update_search_indexed_status('comments', res[-1])
-            pg_con.commit()
             last_comment_id = res[-1][0]
             return True
          return False

@@ -4,3 +4,4 @@ CREATE INDEX IF NOT EXISTS comments_subreddit_idx on comments(subreddit);
 
 CREATE INDEX IF NOT EXISTS comments_created_timestamp_idx on comments(created_utc);
 CREATE INDEX IF NOT EXISTS comments_timestamp_idx on comments(created_utc, retrieved_utc);
+CREATE INDEX IF NOT EXISTS comments_retrieved_idx on comments(retrieved_utc);

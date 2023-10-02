@@ -29,7 +29,7 @@ if not os.path.exists('logs'):
 filename = 'logs/reddit_worker.log'
 handler = RotatingFileHandler(filename,
                             maxBytes=1024*1024*50,
-                            backupCount=999)
+                            backupCount=5)
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                     encoding='utf-8',
                     level=logging.INFO,

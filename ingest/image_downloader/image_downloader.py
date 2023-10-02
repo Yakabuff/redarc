@@ -14,8 +14,8 @@ if not os.path.exists('logs'):
     os.makedirs('logs')
 filename = 'logs/img_downloader_worker.log'
 handler = RotatingFileHandler(filename,
-                              maxBytes=1024*1024*50,
-                              backupCount=999)
+                              maxBytes=1024*1024*10,
+                              backupCount=10)
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                      encoding='utf-8',
                      level=logging.INFO,

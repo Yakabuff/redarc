@@ -35,6 +35,21 @@ Master branch is unstable. Please checkout a release
 
 Install Docker: https://docs.docker.com/engine/install
 
+Services:
+- `postgres`: Main database for threads, comments and subreddits
+- `postgres_fts`: Database for full-text searching
+- `redarc`: API backend and React frontend 
+  - Requires: `redis`, `reddit_worker` if `INGEST_ENABLED`
+- `redis`: Required for any service that uses a task queue
+- `image_downloader`: Asynchronously downloads images from Reddit if `DOWNLOAD_IMAGES`
+  - Requires: `redis`, `reddit_worker`
+- `index_worker`: Indexes threads/comments into postgres_fts 
+  - Requires: `postgres_fts` and `postgres`
+- `reddit_worker`: Asynchronously fetches threads/comments from Reddit 
+  - Requires: `redis`, `image_downloader`
+- `subreddit_worker`: Asynchronously fetches hot/new/rising thread IDs from subreddits 
+  - Requires: `reddit_worker` and `redis`
+
 If you wish to change the postgres password, make sure `POSTGRES_PASSWORD` and `PGPASSWORD` are the same.
 
 If you are using redarc on your personal machine, set docker envars `REDARC_API=http://localhost/api` and `SERVER_NAME=localhost`.
@@ -48,6 +63,16 @@ If you are not using a reverse proxy, it should be the same as `REDARC_API`.
 `SERVER_NAME` is the URL your redarc instance is running on. eg: `redarc.mysite.org`
 
 Setting an `INGEST_PASSWORD` and `ADMIN_PASSWORD` in your API is highly recommended to prevent abuse.
+
+`IMAGE_PATH` is the path you want `image_downloader` worker to download images.  This is the same path the API backend fetches images from.
+
+`INDEX_DELAY` is how often you want `index_worker` to index comments/threads
+
+`SUBREDDITS` is a list of subreddits you want `subreddit_worker` to fetch threads from.  It is delimited by commas
+
+`FETCH_DELAY` is how often you `subreddit_worker` to fetch threads.
+
+`NUM_THREADS` is the number of threads you want downloaded from hot, rising or new.
 
 ## Docker compose (Recommended):
 

@@ -60,7 +60,7 @@ export default function Submit(){
                <label>Submit thread URL: </label>
                <input id="url" type="text" placeholder="redd.it/asdf213"/>
                <label>Password: Leave blank if no password set</label>
-               <input id="password" type="text" placeholder="password"/>
+               <input id="password" type="password" placeholder="password"/>
             </fieldset>
             <button type="submit" class="btn btn-primary">Submit</button>
          </form>

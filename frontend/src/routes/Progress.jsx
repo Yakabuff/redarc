@@ -37,7 +37,7 @@ export default function Progress(){
       <form onSubmit={handleSubmit}>
          <fieldset>
             <label>Password:</label>
-            <input id="password" type="text" placeholder="password"/>
+            <input id="password" type="password" placeholder="password"/>
          </fieldset>
          <button type="submit" class="btn btn-primary">Submit</button>
       </form>

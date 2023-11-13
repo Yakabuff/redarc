@@ -128,7 +128,6 @@ def index_db():
    try:
       cursor.execute("select DISTINCT subreddit from submissions;")
       subreddits = cursor.fetchall()
-      cursor.execute("DELETE from subreddits;")
       for row in subreddits:
          logging.debug("Updating index table:" + str(row[0]))
          cursor.execute("select COUNT(*) from submissions where subreddit = %s;", (row))
@@ -141,7 +140,7 @@ def index_db():
             VALUES (%s, %s, %s, %s) ON CONFLICT (name) DO UPDATE SET(num_submissions, num_comments) = (%s, %s)""",
             (row, False, num_submissions, num_comments, num_submissions, num_comments))
       pg_con.commit()
-      # pg_con.close()
+
    except Exception as error:
       logging.error(error)
 

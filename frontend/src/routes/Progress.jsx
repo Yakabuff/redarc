@@ -2,6 +2,26 @@ import React, { useEffect, useState } from 'react';
 
 export default function Progress(){
    const [progs, setProgress] = useState([]);
+
+   useEffect(() => {
+      fetch(import.meta.env.VITE_API_DOMAIN+ "/progress", {
+         headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+         method: "POST",
+         body: JSON.stringify({})
+      })
+      .then ((resp) => resp.json())
+      .then((data) => {
+         setProgress(data)
+      })
+      .catch((error) => {
+         console.log(error)
+         setProgress([])
+      });
+   }, []);
+
    const handleSubmit = event => {
       event.preventDefault();
       const password = event.target.password.value;
@@ -13,17 +33,14 @@ export default function Progress(){
          method: "POST",
          body: JSON.stringify({'password': password})
       })
-      .then ((resp) => {
-         if (resp['status'] === 401) {
-            throw new Error("Invalid password")
-         } else {
-            return resp.json()
-         }
-      })
+      .then ((resp) => resp.json())
       .then((data) => {
          setProgress(data)
       })
-      .catch((error) => setProgress([]));
+      .catch((error) => {
+         console.log(error)
+         setProgress([])
+      });
    }
 
   return (
@@ -52,7 +69,7 @@ export default function Progress(){
             <td> Job finish </td>
             <td> Status </td>
          </tr>
-         {progs.map((p) => {
+         {progs && progs.map((p) => {
             return (
                <tr>
                   <td> {p.job_id}</td>

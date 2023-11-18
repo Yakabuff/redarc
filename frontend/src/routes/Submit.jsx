@@ -3,6 +3,7 @@ import React, { useEffect, useState} from 'react';
 export default function Submit(){
    const [errorMessage, setErrorMessage] = React.useState("");
    const [errorMessageUnlist, setErrorMessageUnlist] = React.useState("");
+   const [errorMessageWatch, setErrorMessageWatch] = React.useState("");
    const handleSubmit = event => {
       event.preventDefault();
       let request = '/submit';
@@ -77,6 +78,35 @@ export default function Submit(){
       });
    }
 
+   const handleWatch = event => {
+      event.preventDefault();
+      let request = '/watch';
+      const subreddit = event.target.subreddit.value;
+      const action = event.target.action.value;
+      const password = event.target.password.value;
+
+      fetch(import.meta.env.VITE_API_DOMAIN + request, {
+         headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+         method: "POST",
+         body: JSON.stringify({'subreddit': subreddit, 'password': password, 'action': action})
+      })
+      .then (resp => {
+         if (resp['status'] === 401) {
+            throw new Error("Invalid password")
+         } else if(resp['status'] === 500){
+            throw new Error("Failed to watch/unwatch subreddit")
+         } else {
+            throw new Error("Succesfully watched/unwatched subreddit")
+         }
+      })
+      .catch((error) => {
+         setErrorMessageWatch(error.message);
+      });
+   }
+
    return (
       <>
       <body style={{minHeight: 100+'vh', display: 'flex', flexDirection: 'column'}}>
@@ -115,6 +145,25 @@ export default function Submit(){
             <button type="submit" class="btn btn-primary">Submit</button>
          </form>
          {errorMessageUnlist && <div class="alert alert-error"> {errorMessageUnlist} </div>}
+         </div>
+
+         <div class="container">
+         <h1>Watch/unwatch subreddits:</h1>
+         <form onSubmit={handleWatch}>
+            <fieldset>
+               <label>Submit subreddit name: </label>
+               <input id="subreddit" type="text"/>
+               <label for="action">Watch</label>
+               <select name="action" id="action">
+                  <option value="add">Add</option>
+                  <option value="remove">Remove</option>
+               </select>
+               <label>Password: Leave blank if no password set</label>
+               <input id="password" type="password" placeholder="password"/>
+            </fieldset>
+            <button type="submit" class="btn btn-primary">Submit</button>
+         </form>
+         {errorMessageWatch && <div class="alert alert-error"> {errorMessageWatch} </div>}
          </div>
       </body>
       </>

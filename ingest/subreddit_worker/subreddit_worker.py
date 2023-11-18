@@ -10,6 +10,8 @@ from rq.job import JobStatus
 import os
 from rq import Queue
 from dotenv import load_dotenv
+from psycopg2 import pool
+import psycopg2
 load_dotenv()
 
 """
@@ -42,7 +44,11 @@ try:
       user_agent=os.getenv('USER_AGENT'),
       username=os.getenv('REDDIT_USERNAME'),
    )
-
+   pg_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PG_USER'),
+                                                         password=os.getenv('PG_PASSWORD'),
+                                                         host=os.getenv('PG_HOST'),
+                                                         port=os.getenv('PG_PORT'),
+                                                         database=os.getenv('PG_DATABASE'))
    redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=os.getenv('REDIS_PORT'))
 
    url_queue = Queue("url_submit", connection=redis_conn)
@@ -74,7 +80,7 @@ def watch_subreddit(subreddit):
    return ids
 
 def work():
-   subreddits=os.getenv('SUBREDDITS').split(",")
+   subreddits = fetch_subreddits()
    for i in subreddits:
       id_set = watch_subreddit(i)
       for i in id_set:
@@ -100,11 +106,23 @@ def job_exists(id):
       return True
    return False
 
+def fetch_subreddits():
+   try:
+      pg_con = pg_pool.getconn()
+      cursor = pg_con.cursor()
+      cursor.execute('SELECT * FROM watch')
+      pg_pool.putconn(pg_con)
+      submissions = cursor.fetchall()
+   except Exception as error:
+      raise Exception(error) from None
+   
+   return [i[0] for i in submissions]
+
 if __name__ == "__main__":
    logging.info("Starting subreddit_worker")
    try:
       while True:
-        work()
-        time.sleep(int(os.getenv('FETCH_DELAY')))
+         work()
+         time.sleep(int(os.getenv('FETCH_DELAY')))
    except Exception as error:
         logging.error(error)

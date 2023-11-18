@@ -27,15 +27,6 @@ try:
                                                          host=os.getenv('PG_HOST'),
                                                          port=os.getenv('PG_PORT'),
                                                          database=os.getenv('PG_DATABASE'))
-
-   pgfts_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PGFTS_USER'),
-                                                         password=os.getenv('PGFTS_PASSWORD'),
-                                                         host=os.getenv('PGFTS_HOST'),
-                                                         port=os.getenv('PGFTS_PORT'),
-                                                         database=os.getenv('PGFTS_DATABASE'))
-
-   redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=os.getenv('REDIS_PORT'))
-   url_queue = Queue("url_submit", connection=redis_conn)
 except Exception as error:
    logger.error(error)
    # https://stackoverflow.com/questions/41071262/how-to-stop-gunicorn-when-flask-application-exits
@@ -47,20 +38,41 @@ comments = Comments(pg_pool)
 subreddits = Subreddits(pg_pool)
 progress = Progress(pg_pool)
 submissions = Submissions(pg_pool)
-submit = Submit(url_queue)
 status = Status(pg_pool)
-search = Search(pgfts_pool)
 media = Media(os.getenv('IMAGE_PATH'))
 unlist = Unlist(pg_pool)
 watch = Watch(pg_pool)
 
-app.add_route('/submit', submit)
 app.add_route('/search/comments', comments)
 app.add_route('/search/submissions', submissions)
 app.add_route('/search/subreddits', subreddits)
-app.add_route('/search', search)
 app.add_route('/progress', progress)
 app.add_route('/status', status)
 app.add_route('/media', media)
 app.add_route('/unlist', unlist)
 app.add_route('/watch', watch)
+
+if os.getenv('SEARCH_ENABLED') == "true":
+   try:
+      pgfts_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.getenv('PGFTS_USER'),
+                                                            password=os.getenv('PGFTS_PASSWORD'),
+                                                            host=os.getenv('PGFTS_HOST'),
+                                                            port=os.getenv('PGFTS_PORT'),
+                                                            database=os.getenv('PGFTS_DATABASE'))
+   except Exception as error:
+      logger.error(error)
+      sys.exit(4)
+
+   search = Search(pgfts_pool)
+   app.add_route('/search', search)
+
+if os.getenv('INGEST_ENABLED') == "true":
+   try:
+      redis_conn = Redis(host=os.getenv('REDIS_HOST'), port=os.getenv('REDIS_PORT'))
+   except Exception as error:
+      logger.error(error)
+      sys.exit(4)
+
+   url_queue = Queue("url_submit", connection=redis_conn)
+   submit = Submit(url_queue)
+   app.add_route('/submit', submit)

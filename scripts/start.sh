@@ -10,6 +10,7 @@ psql -h pgsql-dev -U postgres -p $PG_PORT -a -f scripts/db_submissions_index.sql
 psql -h pgsql-dev -U postgres -p $PG_PORT -a -f scripts/db_status_comments.sql
 psql -h pgsql-dev -U postgres -p $PG_PORT -a -f scripts/db_status_submissions.sql
 psql -h pgsql-dev -U postgres -p $PG_PORT -a -f scripts/db_progress.sql
+psql -h pgsql-dev -U postgres -p $PG_PORT -a -f scripts/db_watchedsubreddits.sql
 unset PGPASSWORD
 export PGPASSWORD=$PGFTS_PASSWORD
 psql -h pgsql-fts -U postgres -p $PGFTS_PORT -a -f scripts/db_fts.sql

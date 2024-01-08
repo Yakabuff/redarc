@@ -11,5 +11,6 @@ COPY . .
 RUN pip install rq
 RUN pip install python-dotenv
 RUN pip install praw
+RUN pip install psycopg2-binary
 
 CMD ["python3", "subreddit_worker.py"]

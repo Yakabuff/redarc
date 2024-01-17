@@ -28,8 +28,8 @@ with open(filename) as file:
       line = line.rstrip()
       item_dict = json.loads(line)
 
-      if 'id' in item_dict and isinstance(item_dict['id'], str):
-         identifier = item_dict['id'].strip()
+      if 'id' in item_dict and isinstance(item_dict['id'], int):
+         identifier = str(item_dict['id'])
       else:
          logging.error("Could not find ID")
          logging.debug("Line number: "+ str(line_number))
@@ -74,21 +74,27 @@ with open(filename) as file:
         logging.debug("Line number: "+ str(line_number))
         created_utc = 0
 
+      if item_type == "story":
+         if 'url' in item_dict and isinstance(item_dict['url'], str):
+            url = item_dict['url'].strip()
+         else:
+            url = ""
+
       if item_type == "story" or item_type == "comment" or item_type == "pollopt":
          if 'text' in item_dict and isinstance(item_dict['text'], str):
             # delete null chars
             text = item_dict['text'].strip().replace("\u0000", "")
          else:
-            logging.warning("Could not find body in " + identifier)
-            logging.debug("Line number: "+ str(line_number))
             text = ""
+      else:
+         text = ""
 
       if item_type == "story" or item_type == "poll" or item_type == "job":
          if 'title' in item_dict and isinstance(item_dict['title'], str):
             # delete null chars
             title = item_dict['title'].strip().replace("\u0000", "")
          else:
-            logging.warning("Could not find body in " + identifier)
+            logging.warning("Could not find body in " + str(identifier))
             logging.debug("Line number: "+ str(line_number))
             title = ""
 
@@ -101,21 +107,32 @@ with open(filename) as file:
             continue
 
       if item_type == "comment":
-         if 'parent' in item_dict and isinstance(item_dict['parent'], str):
-            parent_id = item_dict['parent'].strip()
+         if 'parent' in item_dict and isinstance(item_dict['parent'], int):
+            parent_id = str(item_dict['parent']).strip()
          else:
-            logging.warning("Could not find parent in " + identifier)
-            logging.debug("Line number: "+ str(line_number))
+            parent_id = ""
+      else:
+         parent_id = ""
 
-      if item_type == "story":
-         if 'url' in item_dict and isinstance(item_dict['url'], str):
-            url = item_dict['url'].strip()
+      if item_type == "job":
+         is_self = False 
+      elif item_type == "story":
+         if url == "" and title != "":
+            is_self = False 
          else:
-            url = ""
+            is_self = True
+      else:
+         is_self = True 
+
+      if item_type == "story" or item_type == "poll":
+         if 'descendants' in item_dict and isinstance(item_dict['descendants'], int):
+            replies = item_dict['descendants']
+         else:
+            replies = 0
 
       if item_type == "comment" or type == "pollopt":
          try:
-            cursor.execute('INSERT INTO comments(id, subreddit, body, author, score, gilded, created_utc, parent_id, retrieved_utc) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, item_type, text, author, score, created_utc, parent_id, url, int(time.time())])
+            cursor.execute('INSERT INTO comments(id, subreddit, body, author, score, gilded, created_utc, parent_id, link_id, retrieved_utc) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, item_type, text, author, score, 0, created_utc, parent_id, "", int(time.time())])
          except Exception as error:
             logging.error("ERROR:" + str(error))
             logging.debug(identifier)
@@ -127,18 +144,23 @@ with open(filename) as file:
             logging.debug(parent_id)
             continue
       elif item_type == "poll" or item_type == "job" or item_type == "story":
+         
          try:
-            cursor.execute('INSERT INTO submission(id, subreddit, body, author, score, gilded, created_utc, parent_id, link_id, retrieved_utc) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, item_type, text, author, score, created_utc, parent_id, url, int(time.time())])
+            cursor.execute('INSERT INTO submissions(id, subreddit, title, author, permalink, thumbnail, num_comments, url, score, gilded, created_utc, self_text, is_self, retrieved_utc) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (id) DO NOTHING', [identifier, item_type, title, author, "", "", replies, url, score, 0, created_utc, text, is_self, int(time.time())])
          except Exception as error:
-            logging.error("ERROR:" + str(error))
+            logging.error("ERROR: "+ str(error))
+            logging.debug("Line number: "+ str(line_number))
             logging.debug(identifier)
             logging.debug(item_type)
-            logging.debug(text)
+            logging.debug(title)
             logging.debug(author)
+            logging.debug(replies)
+            logging.debug(url)
             logging.debug(score)
             logging.debug(created_utc)
-            logging.debug(parent_id)
-            logging.debug(url)
+            logging.debug(text)
+            logging.debug(is_self)
+            logging.debug("================================")
             continue
       else:
          logging.error("ERROR: invalid item type")

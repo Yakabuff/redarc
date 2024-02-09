@@ -1,11 +1,15 @@
 # redarc
-A self-hosted solution to search, view and create your own Reddit archives.
+A self-hosted solution to search, view and archive link aggregators.
+
+### Supports:
+- Reddit
+- HackerNews (in progress)
 
 ## Features:
 - Ingest pushshift dumps
 - View threads/comments
 - Fulltext search via PostgresFTS
-- Submit threads to be archived via API (Completely untested.  Developed with mock data and the [PRAW](https://praw.readthedocs.io/en/stable/) documentation)
+- Submit threads to be archived via API
 - Periodically fetch rising, new and hot threads from specified subreddits
 - Download `i.redd.it` images from threads.
 
@@ -83,7 +87,7 @@ Modify envars as needed
 $ git clone https://github.com/Yakabuff/redarc.git
 $ cd redarc
 $ git fetch --all --tags
-$ git checkout tags/v0.5.1 -b v0.5.1
+$ git checkout tags/vx.y.z -b vx.y.z
 // Modify .env as-needed
 $ cp default.env .env
 $ docker compose up -d
